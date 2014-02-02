@@ -2,9 +2,6 @@
  *
  ************************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-
 
 char letters[26][3][6] = {{"____", 
                            "|__|", 
@@ -372,4 +369,60 @@ void print_big_text(char input[], int row, int col) {
             continue;   // don't print illegal chars
         }
     }
+}
+
+
+/* text_length - returns the total length of the printed big text */
+int text_length(char input[]) {
+
+    int i, len = 0;
+    for (i = 0; i < strlen(input); i++) {   // for each letter in input
+        if (input[i] == ' ') {
+            ++len;
+        } else if (input[i] >= 'a' && input[i] <= 'z') {
+            len += strlen(letters[input[i] - 'a'][0]);
+        } else if (input[i] >= 'A' && input[i] <= 'Z') {
+            len += strlen(letters[input[i] - 'A'][0]);
+        } else if (input[i] >= '0' && input[i] <= '9') {
+            len += strlen(numbers[input[i] - '0'][0]);
+        } else if (input[i] == '!') {
+            len += strlen(exclamation[0]);
+        } else if (input[i] == '#') {
+            len += strlen(hash[0]);
+        } else if (input[i] == '$') {
+            len += strlen(dollar[0]);
+        } else if (input[i] == '%') {
+            len += strlen(percent[0]);
+        } else if (input[i] == '^') {
+            len += strlen(caret[0]);
+        } else if (input[i] == '&') {
+            len += strlen(ampersand[0]);
+        } else if (input[i] == '*') {
+            len += strlen(mult[0]);
+        } else if (input[i] == '(') {
+            len += strlen(left_parens[0]);
+        } else if (input[i] == ')') {
+            len += strlen(right_parens[0]);
+        } else if (input[i] == '-') {
+            len += strlen(hyphen[0]);
+        } else if (input[i] == '_') {
+            len += strlen(underscore[0]);
+        } else if (input[i] == '+') {
+            len += strlen(plus[0]);
+        } else if (input[i] == '=') {
+            len += strlen(equals[0]);
+        } else if (input[i] == ':') {
+            len += strlen(colen[0]);
+        } else if (input[i] == ';') {
+            len += strlen(semicolen[0]);
+        } else if (input[i] == '\'') {
+            len += strlen(apostraphe[0]);
+        } else if (input[i] == '\"') {
+            len += strlen(double_apostraphe[0]);
+        } else {
+            continue;   // don't print illegal chars
+        }
+        ++len;  // Count whitespace
+    }
+    return len;
 }

@@ -2,13 +2,14 @@
  *
  ************************************************************************************/
  
+
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "big_text.h"
+#include "big_text.h"
 
 
-#define HEADER_BUFFER 8    /* y buffer spacing for header */
+#define HEADER_BUFFER 12    /* y buffer spacing for header */
 #define X_BUFFER 2          /* x buffer for side spacing */
 #define Y_BUFFER 2          /* y buffer for top spacing */
 
@@ -22,17 +23,18 @@ main(int argc, char *argv[])
     int row, col, strings = 6,
         staff_length = strings + 1;
     char tuning[] = "EADGBE";
-    char author[] = "Author";
-    char song[]   = "Song";
+    char author[] = "by Artist";
+    char song[]   = "Big Long Song Title";
     char tabbed[] = "Tabbed By: _________________________";
     char email[]  = "Email: _________________________";
 
     initscr();
     getmaxyx(stdscr, row, col);
 
+    
     // Header
-    mvprintw(Y_BUFFER - 1     , (col - strlen(author))/2         , "%s", author);
-    mvprintw(Y_BUFFER         , (col - strlen(song))/2           , "%s", song);
+    print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
+    mvprintw(Y_BUFFER + 3     , (col - strlen(author)) / 2       , "%s", author);
     mvprintw(HEADER_BUFFER - 4, col - (strlen(tabbed) + X_BUFFER), "%s", tabbed);
     mvprintw(HEADER_BUFFER - 3, col - (strlen(email) + X_BUFFER) , "%s", email);
     mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s%s", "Tuning: ", tuning);
