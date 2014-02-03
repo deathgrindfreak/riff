@@ -29,15 +29,27 @@ main(int argc, char *argv[])
     char email[]  = "Email: _________________________";
 
     initscr();
+
+    if (has_colors() == TRUE)   // Test if terminal has color
+        start_color();
+
     getmaxyx(stdscr, row, col);
 
     
     // Header
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
+
+    attron(A_BOLD);
+    attron(COLOR_PAIR(1));
     print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
+    attroff(COLOR_PAIR(1));
+
     mvprintw(Y_BUFFER + 3     , (col - strlen(author)) / 2       , "%s", author);
     mvprintw(HEADER_BUFFER - 4, col - (strlen(tabbed) + X_BUFFER), "%s", tabbed);
     mvprintw(HEADER_BUFFER - 3, col - (strlen(email) + X_BUFFER) , "%s", email);
     mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s%s", "Tuning: ", tuning);
+    attroff(A_BOLD);
 
     int printrow = HEADER_BUFFER;
     while (printrow < row) {
