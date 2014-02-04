@@ -12,8 +12,10 @@
 #define HEADER_BUFFER 12    /* y buffer spacing for header */
 #define X_BUFFER 2          /* x buffer for side spacing */
 #define Y_BUFFER 2          /* y buffer for top spacing */
+#define LENGTH 100          /* Length for arrays */
 
 
+void header(int, char[], char[], char[], char[], char[]);
 void staff(int, int, int, char[]);
 void measure(int, int, int);
 WINDOW *title_info_win(int, int, int, int);
@@ -22,16 +24,32 @@ void destroy_win(WINDOW *local_win);
 
 main(int argc, char *argv[])
 {
-    WINDOW *title_win;
+    // Initial values
+    WINDOW *title_win;  // Title window pointer
 
-    int row, col, strings = 6,
-        staff_length = strings + 1;
-    char tuning[] = "EADGBE";
-    char author[] = "by Artist";
-    char song[]   = "Big Long Song Title";
-    char tabbed[] = "Tabbed By: _________________________";
-    char email[]  = "Email: _________________________";
+    int row, col;
+    int strings = 6, staff_length = strings + 1;
+    
+    // Title Window params
+    int width  = 60;
+    int height = 20;
+    int startx = (col - width) / 2;
+    int starty = (row - height) / 2;
+    
+    char tuning[LENGTH];
+    char author[LENGTH];
+    char   song[LENGTH];
+    char tabbed[LENGTH];
+    char  email[LENGTH];
 
+         tuning[0] = 0;
+         author[0] = 0;
+           song[0] = 0;
+         tabbed[0] = 0;
+          email[0] = 0;
+
+
+    // Start screen
     initscr();
 
     if (has_colors() == TRUE)   // Test if terminal has color
@@ -39,26 +57,8 @@ main(int argc, char *argv[])
 
     getmaxyx(stdscr, row, col);
     
-    int width  = 60;
-    int height = 20;
-    int startx = (col - width) / 2;
-    int starty = (row - height) / 2;
-    
     // Header
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
-
-    attron(A_BOLD);
-    attron(COLOR_PAIR(1));
-    print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
-    attroff(COLOR_PAIR(1));
-
-    mvprintw(Y_BUFFER + 3     , (col - strlen(author)) / 2       , "%s", author);
-    mvprintw(HEADER_BUFFER - 4, col - (strlen(tabbed) + X_BUFFER), "%s", tabbed);
-    mvprintw(HEADER_BUFFER - 3, col - (strlen(email) + X_BUFFER) , "%s", email);
-    mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s%s", "Tuning: ", tuning);
-    attroff(A_BOLD);
-
+    header(col, tuning, author, song, tabbed, email);
 
     // Staffs
     int printrow = HEADER_BUFFER;
@@ -67,7 +67,6 @@ main(int argc, char *argv[])
         printrow += staff_length;
     }
     refresh();
-    
 
     // Title Window
     title_win = title_info_win(height, width, starty, startx);
@@ -83,6 +82,38 @@ main(int argc, char *argv[])
     return 0;
 }
 
+
+/* header - prints the header at the top of the screen */
+void header(int col, char tuning[], char author[], char song[], char tabbed[], char email[]) {
+
+    // Set to default values if not specified
+    if (tuning[0] == 0)
+        strcpy(tuning, "EADGBE");
+    if (author[0] == 0)
+        strcpy(author, "by Artist");
+    if (song[0] == 0)
+        strcpy(song, "Untitled");
+    if (tabbed[0] == 0)
+        strcpy(tabbed, "Tabbed By: _________________________");
+    if (email[0] == 0)
+        strcpy(email, "Email: _________________________");
+
+
+    // Print Header
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
+
+    attron(A_BOLD);
+    attron(COLOR_PAIR(1));
+    print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
+    attroff(COLOR_PAIR(1));
+
+    mvprintw(Y_BUFFER + 3     , (col - strlen(author)) / 2       , "%s", author);
+    mvprintw(HEADER_BUFFER - 4, col - (strlen(tabbed) + X_BUFFER), "%s", tabbed);
+    mvprintw(HEADER_BUFFER - 3, col - (strlen(email) + X_BUFFER) , "%s", email);
+    mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s%s", "Tuning: ", tuning);
+    attroff(A_BOLD);
+}
 
 /* measure - inserts a measure at (y, x) == (row, col) */
 void measure(int strings, int row, int col) {
@@ -128,7 +159,6 @@ WINDOW *title_info_win(int height, int width, int starty, int startx) {
     int Y_BUFF = 2;
     int X_BUFF = 2;
     
-    int LENGTH = 100;   // Length for tuning array
 
     int strings = 8;
 
@@ -155,9 +185,9 @@ WINDOW *title_info_win(int height, int width, int starty, int startx) {
 
 
     // Print to screen
-    attron(A_BOLD);
+    wattron(local_win, A_BOLD);
     mvwprintw(local_win, Y_BUFF, (width - strlen(title_welcome)) / 2, "%s", title_welcome);
-    attroff(A_BOLD);
+    wattroff(local_win, A_BOLD);
 
     mvwprintw(local_win, Y_BUFF + HEADER     , X_BUFF, "%s", title_song_title);
     mvwprintw(local_win, Y_BUFF + HEADER + 2 , X_BUFF, "%s", title_artist);
