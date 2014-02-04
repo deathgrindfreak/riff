@@ -32,7 +32,7 @@ main(int argc, char *argv[])
     
     // Title Window params
     int width  = 60;
-    int height = 20;
+    int height = 25;
     int startx = (col - width) / 2;
     int starty = (row - height) / 2;
     
@@ -162,12 +162,13 @@ WINDOW *title_info_win(int height, int width, int starty, int startx) {
 
     int strings = 8;
 
-    char title_welcome[]      = "Welcome to Riff!";
-    char title_song_title[]   = "Song Title: ___________________________________________ ";
-    char title_artist[]       = "Artist:     ___________________________________________ ";
-    char title_tabbed[]       = "Tabbed by:  ___________________________________________ ";
-    char title_email[]        = "Email:      ___________________________________________ ";
-    char title_strings[]      = "Number of Strings: ";
+    char title_welcome[]       = "Welcome to Riff!";
+    char title_project_title[] = "Project Title: ________________________________________ ";
+    char title_song_title[]    = "Song Title: ___________________________________________ ";
+    char title_artist[]        = "Artist:     ___________________________________________ ";
+    char title_tabbed[]        = "Tabbed by:  ___________________________________________ ";
+    char title_email[]         = "Email:      ___________________________________________ ";
+    char title_strings[]       = "Number of Strings: ";
     char title_tuning[LENGTH];
 
     int i;
@@ -189,12 +190,14 @@ WINDOW *title_info_win(int height, int width, int starty, int startx) {
     mvwprintw(local_win, Y_BUFF, (width - strlen(title_welcome)) / 2, "%s", title_welcome);
     wattroff(local_win, A_BOLD);
 
-    mvwprintw(local_win, Y_BUFF + HEADER     , X_BUFF, "%s", title_song_title);
-    mvwprintw(local_win, Y_BUFF + HEADER + 2 , X_BUFF, "%s", title_artist);
-    mvwprintw(local_win, Y_BUFF + HEADER + 4 , X_BUFF, "%s", title_tabbed);
-    mvwprintw(local_win, Y_BUFF + HEADER + 6 , X_BUFF, "%s", title_email);
-    mvwprintw(local_win, Y_BUFF + HEADER + 10, X_BUFF, "%s", title_strings);
-    mvwprintw(local_win, Y_BUFF + HEADER + 12, X_BUFF, "%s", title_tuning);
+    mvwprintw(local_win, Y_BUFF + HEADER     , X_BUFF, "%s", title_project_title);
+
+    mvwprintw(local_win, Y_BUFF + HEADER + 4 , X_BUFF, "%s", title_song_title);
+    mvwprintw(local_win, Y_BUFF + HEADER + 6 , X_BUFF, "%s", title_artist);
+    mvwprintw(local_win, Y_BUFF + HEADER + 8 , X_BUFF, "%s", title_tabbed);
+    mvwprintw(local_win, Y_BUFF + HEADER + 10, X_BUFF, "%s", title_email);
+    mvwprintw(local_win, Y_BUFF + HEADER + 14, X_BUFF, "%s", title_strings);
+    mvwprintw(local_win, Y_BUFF + HEADER + 16, X_BUFF, "%s", title_tuning);
     
     wrefresh(local_win);
 
