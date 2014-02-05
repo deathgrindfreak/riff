@@ -48,7 +48,7 @@
 void header(int, char[], char[], char[], char[], char[]);
 void staff(int, int, int, char[]);
 void measure(int, int, int);
-WINDOW* title_info_win(int, int, int, int);
+WINDOW* title_info_win(int, int, int, int, int);
 void destroy_win(WINDOW *);
 
 
@@ -60,12 +60,14 @@ main(int argc, char *argv[])
     int row, col;
     int strings = 6, staff_length = strings + 1;
     
+    char proj_title[LENGTH];
     char tuning[LENGTH];
     char author[LENGTH];
     char   song[LENGTH];
     char tabbed[LENGTH];
     char  email[LENGTH];
 
+     proj_title[0] = 0;
          tuning[0] = 0;
          author[0] = 0;
            song[0] = 0;
@@ -113,69 +115,139 @@ main(int argc, char *argv[])
     int startx = (col - width) / 2;
     int starty = (row - height) / 2;
     
-    title_win = title_info_win(height, width, starty, startx);
+    title_win = title_info_win(height, width, starty, startx, strings);
     keypad(title_win, true);
+
+    int x_mins[7] = {
+                        WIN_X_BUFFER + strlen("Project Title: "),
+                        WIN_X_BUFFER + strlen("Song Title: "),
+                        WIN_X_BUFFER + strlen("Artist:     "),
+                        WIN_X_BUFFER + strlen("Tabbed by:  "),
+                        WIN_X_BUFFER + strlen("Email:      "),
+                        WIN_X_BUFFER + strlen("Number of String:  "),
+                        WIN_X_BUFFER + strlen("Tuning: (1)"),
+                    };
     
     int movements[7][2] = {
-                            {WIN_Y_BUFFER + WIN_HEADER      , WIN_X_BUFFER + strlen("Project Title: ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 4  , WIN_X_BUFFER + strlen("Song Title: ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 6  , WIN_X_BUFFER + strlen("Artist:     ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 8  , WIN_X_BUFFER + strlen("Tabbed by:  ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 10 , WIN_X_BUFFER + strlen("Email:      ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 14 , WIN_X_BUFFER + strlen("Number of Strings: ")},
-                            {WIN_Y_BUFFER + WIN_HEADER + 16 , WIN_X_BUFFER + strlen("Tuning: (1)")},
+                            {WIN_Y_BUFFER + WIN_HEADER      , x_mins[0]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 4  , x_mins[1]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 6  , x_mins[2]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 8  , x_mins[3]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 10 , x_mins[4]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 14 , x_mins[5]},
+                            {WIN_Y_BUFFER + WIN_HEADER + 16 , x_mins[6]},
                           };
 
-    int y, x, cur_x = movements[0][1], c, pos = 0;
+    int y, x, cur_x = movements[0][1], ch, pos = 0;
     wmove(title_win, movements[0][0], movements[0][1]);
     wrefresh(title_win);
 
     while (1) {
-        c = wgetch(title_win);
+        ch = wgetch(title_win);
         getyx(title_win, y, x);
         cur_x = x;
-        switch (c) {
-            case KEY_UP:
-                if (pos != 0) {   // Not at top input label
-                    --pos;
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
-                }
-                break;
+        if (ch ==  KEY_UP) {
+            if (pos != 0) {   // Not at top input label
+                --pos;
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+            }
 
-            case KEY_DOWN:
-                if (pos != 6) {   // Not at bottom input label
-                    ++pos;
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
-                }
-                break;
+        } else if (ch == KEY_DOWN) {
+            if (pos != 6) {   // Not at bottom input label
+                ++pos;
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+            }
 
-            case KEY_LEFT:
-                if (x > movements[pos][1] && x <= width - 2 * WIN_X_BUFFER) {
-                    if (pos != 5 && pos != 6) {
-                        --cur_x;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    } else if (pos == 6) {
-                        cur_x -= 6;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    }
+        } else if (ch == KEY_LEFT) {
+            if (x > movements[pos][1] && x <= width - 2 * WIN_X_BUFFER) {
+                if (pos != 5 && pos != 6) {
+                    --cur_x;
+                    wmove(title_win, movements[pos][0], cur_x);
+                } else if (pos == 6) {
+                    cur_x -= 6;
+                    wmove(title_win, movements[pos][0], cur_x);
                 }
-                break;
+            }
 
-            case KEY_RIGHT:
-                if (x >= movements[pos][1] && x < width - 2 * WIN_X_BUFFER) {
-                    if (pos != 5 && pos != 6) {
-                        ++cur_x;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    } else if (pos == 6) {
-                        cur_x += 6;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    }
+        } else if (ch == KEY_RIGHT) {
+            if (x >= movements[pos][1] && x < width - 2 * WIN_X_BUFFER) {
+                if (pos != 5 && pos != 6) {
+                    ++cur_x;
+                    wmove(title_win, movements[pos][0], cur_x);
+                } else if (pos == 6) {
+                    cur_x += 6;
+                    wmove(title_win, movements[pos][0], cur_x);
                 }
-                break;
+            }
+
+        } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
+                   (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {
+            if (pos == 0) {
+                proj_title[strlen(proj_title) - 1] = ch;
+                proj_title[strlen(proj_title)] = '\0';
+            } else if (pos == 1) {
+                song[strlen(song)-1] = ch;
+                song[strlen(song)] = '\0';
+            } else if (pos == 2) {
+                author[strlen(author)-1] = ch;
+                author[strlen(author)] = '\0';
+            } else if (pos == 3) {
+                tabbed[strlen(tabbed)-1] = ch;
+                tabbed[strlen(tabbed)] = '\0';
+            } else if (pos == 4) {
+                email[strlen(email)-1] = ch;
+                email[strlen(email)] = '\0';
+            } else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
+                strings = ch - '0';
+                //destroy_win(title_win);
+                //title_win = title_info_win(height, width, starty, startx, strings);
+            } else if ((pos == 6) && (ch == 'b' || (ch >= 'A' && ch <= 'G') || ch == '#')) {
+                tuning[strlen(tuning)-1] = ch;
+                tuning[strlen(tuning)] = '\0';
+            }
+
+            if (pos == 5 && (ch >= '4' && ch <= '8')) {
+                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
+                wmove(title_win, movements[pos][0], x_mins[pos]);
+            } else if (pos == 6 && (ch == 'b' || (ch >= 'A' && ch <= 'G') || ch == '#')) {
+                // Need to change these movements
+                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
+                ++movements[pos][1];
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+            } else if (pos != 5 && pos != 6) {
+                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
+                ++movements[pos][1];
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+            }
+
+        } else if (ch == KEY_BACKSPACE && x > x_mins[pos]) {
+            if (pos == 0)
+                proj_title[strlen(proj_title)-1] = '\0';
+            else if (pos == 1)
+                song[strlen(song)-1] = '\0';
+            else if (pos == 2)
+                author[strlen(author)-1] = '\0';
+            else if (pos == 3)
+                tabbed[strlen(tabbed)-1] = '\0';
+            else if (pos == 4)
+                email[strlen(email)-1] = '\0';
+            else if (pos == 5) {
+                strings = 6;
+                //destroy_win(title_win);
+                //title_win = title_info_win(height, width, starty, startx, strings);
+            } else if (pos == 6)
+                tuning[strlen(tuning)-1] = '\0';
+
+            if (pos == 5) {
+                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
+                wmove(title_win, movements[pos][0], x_mins[pos]);
+            } else {
+                --movements[pos][1];
+                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+            }
         }
     }
-
-
 
 
     getch();
@@ -256,13 +328,11 @@ void staff(int strings, int row, int max_col, char tuning[]) {
 }
 
 /* Creates the title info window and prints the associated labels */
-WINDOW* title_info_win(int height, int width, int starty, int startx) {
+WINDOW* title_info_win(int height, int width, int starty, int startx, int strings) {
     WINDOW *local_win;
 
     local_win = newwin(height, width, starty, startx);
     box(local_win, 0, 0);
-
-    int strings = 8;
 
     char title_welcome[]       = "Welcome to Riff!";
     char title_project_title[] = "Project Title: ________________________________________ ";
@@ -270,14 +340,14 @@ WINDOW* title_info_win(int height, int width, int starty, int startx) {
     char title_artist[]        = "Artist:     ___________________________________________ ";
     char title_tabbed[]        = "Tabbed by:  ___________________________________________ ";
     char title_email[]         = "Email:      ___________________________________________ ";
-    char title_strings[]       = "Number of Strings: ";
+    char title_strings[]       = "Number of Strings: _";
     char title_tuning[LENGTH];
 
     int i;
     char s[2]; 
     s[1] = '\0';
     strcpy(title_tuning, "Tuning: ");
-    if (strings >= 4 && strings <=8) {
+    if (strings >= 4 && strings <= 8) {
         for (i = 1; i <= strings; i++) {
             s[0] = i + '0';
             strcat(title_tuning, "(");
