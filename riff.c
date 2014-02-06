@@ -58,7 +58,7 @@ main(int argc, char *argv[])
     WINDOW *title_win;  // Title window pointer
 
     int row, col;
-    int strings = 6, staff_length = strings + 1;
+    int strings = 6, staff_length = strings + 1;    // Default number of strings is 6
     
     char proj_title[LENGTH];
     char tuning[LENGTH];
@@ -138,7 +138,18 @@ main(int argc, char *argv[])
                             {WIN_Y_BUFFER + WIN_HEADER + 16 , x_mins[6]},
                           };
 
-    int y, x, cur_x = movements[0][1], ch, pos = 0;
+    int tuning_moves[8] = {
+                            WIN_X_BUFFER + strlen("Tuning: (1)"),
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 2 * 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 3 * 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 4 * 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 5 * 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 6 * 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") + 7 * 6,
+                          };
+
+    int y, x, cur_tune = 0, cur_x = movements[0][1], ch, pos = 0;
     wmove(title_win, movements[0][0], movements[0][1]);
     wrefresh(title_win);
 
@@ -164,8 +175,13 @@ main(int argc, char *argv[])
                     --cur_x;
                     wmove(title_win, movements[pos][0], cur_x);
                 } else if (pos == 6) {
-                    cur_x -= 6;
-                    wmove(title_win, movements[pos][0], cur_x);
+                    if (x == tuning_moves[cur_tune]) {
+                        --cur_tune;
+                        wmove(title_win, movements[pos][0], tuning_moves[cur_tune] + 1);
+                    } else if (x == tuning_moves[cur_tune] + 1) {
+                        --cur_x;
+                        wmove(title_win, movements[pos][0], cur_x);
+                    }
                 }
             }
 
@@ -174,14 +190,20 @@ main(int argc, char *argv[])
                 if (pos != 5 && pos != 6) {
                     ++cur_x;
                     wmove(title_win, movements[pos][0], cur_x);
-                } else if (pos == 6) {
-                    cur_x += 6;
-                    wmove(title_win, movements[pos][0], cur_x);
+                } else if (pos == 6 && x < tuning_moves[strings-1] + 1) {
+                    if (x == tuning_moves[cur_tune]) {
+                        ++cur_x;
+                        wmove(title_win, movements[pos][0], cur_x);
+                    } else if (x == tuning_moves[cur_tune] + 1) {
+                        ++cur_tune;
+                        wmove(title_win, movements[pos][0], tuning_moves[cur_tune]);
+                    }
                 }
             }
 
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-                   (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {
+                   (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
+            // Enter chars into char arrays
             if (pos == 0) {
                 proj_title[strlen(proj_title) - 1] = ch;
                 proj_title[strlen(proj_title)] = '\0';
@@ -205,15 +227,25 @@ main(int argc, char *argv[])
                 tuning[strlen(tuning)-1] = ch;
                 tuning[strlen(tuning)] = '\0';
             }
-
+            
+            // Movements
             if (pos == 5 && (ch >= '4' && ch <= '8')) {
                 mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
                 wmove(title_win, movements[pos][0], x_mins[pos]);
-            } else if (pos == 6 && (ch == 'b' || (ch >= 'A' && ch <= 'G') || ch == '#')) {
-                // Need to change these movements
+            } else if (pos == 6  && (x == tuning_moves[cur_tune] && ch >= 'A' && ch <= 'G') ||
+                                    (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#'))) {
                 mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
-                ++movements[pos][1];
-                wmove(title_win, movements[pos][0], movements[pos][1]);
+                if (cur_tune < strings-1) { //<----------------------------------------
+                    if (x == tuning_moves[cur_tune] + 1) {
+                        ++cur_tune;
+                        movements[pos][1] = tuning_moves[cur_tune];
+                    } else
+                        ++movements[pos][1];
+                    wmove(title_win, movements[pos][0], movements[pos][1]);
+                } else if (cur_tune == strings - 2 && x == tuning_moves[cur_tune] + 1) {
+                    ++movements[pos][1];
+                    wmove(title_win, movements[pos][0], movements[pos][1]);
+                }
             } else if (pos != 5 && pos != 6) {
                 mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
                 ++movements[pos][1];
@@ -221,6 +253,7 @@ main(int argc, char *argv[])
             }
 
         } else if (ch == KEY_BACKSPACE && x > x_mins[pos]) {
+            // Delete chars from arrays
             if (pos == 0)
                 proj_title[strlen(proj_title)-1] = '\0';
             else if (pos == 1)
@@ -238,6 +271,7 @@ main(int argc, char *argv[])
             } else if (pos == 6)
                 tuning[strlen(tuning)-1] = '\0';
 
+            // Movements
             if (pos == 5) {
                 mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
                 wmove(title_win, movements[pos][0], x_mins[pos]);
