@@ -46,7 +46,7 @@
 #define MIN_HEIGHT 35       /* Minimum height for terminal */
 
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     // Initial values
     WINDOW *title_win;  // Title window pointer
@@ -239,8 +239,8 @@ main(int argc, char *argv[])
             if (pos == 5 && (ch >= '4' && ch <= '8')) {
                 mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
                 wmove(title_win, movements[pos][0], x_mins[pos]);
-            } else if (pos == 6  && (x == tuning_moves[cur_tune] && ch >= 'A' && ch <= 'G') ||
-                                    (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#'))) {
+            } else if (pos == 6  && ((x == tuning_moves[cur_tune] && ch >= 'A' && ch <= 'G') ||
+                                     (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
                 mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
                 if (cur_tune < strings-1) {
                     if (x == tuning_moves[cur_tune] + 1) {
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
                 wmove(title_win, movements[pos][0], movements[pos][1]);
             }
 
-        } else if (ch == KEY_BACKSPACE ) {
+        } else if (ch == 127 || ch == 8) {
             if (x > x_mins[pos]) {
                 // Delete chars from arrays
                 if (pos == 0)
