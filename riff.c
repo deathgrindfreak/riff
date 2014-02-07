@@ -35,15 +35,17 @@
 #include "riff.h"
 
 
-#define HEADER_BUFFER 12    /* y buffer spacing for header */
-#define X_BUFFER 2          /* x buffer for side spacing */
-#define Y_BUFFER 2          /* y buffer for top spacing */
-#define LENGTH 100          /* Length for arrays */
-#define WIN_HEADER 3        /* y buffer spacing for window header */
-#define WIN_X_BUFFER 2      /* x buffer spacing for window */
-#define WIN_Y_BUFFER 2      /* y buffer spacing for window */
-#define MIN_WIDTH 70        /* Minimum width for terminal */
-#define MIN_HEIGHT 35       /* Minimum height for terminal */
+#define HEADER_BUFFER 12    	/* y buffer spacing for header */
+#define X_BUFFER 2          	/* x buffer for side spacing */
+#define Y_BUFFER 2          	/* y buffer for top spacing */
+#define LENGTH 100          	/* Length for arrays */
+#define WIN_HEADER 3        	/* y buffer spacing for window header */
+#define WIN_X_BUFFER 2      	/* x buffer spacing for window */
+#define WIN_Y_BUFFER 2      	/* y buffer spacing for window */
+#define MIN_WIDTH 70        	/* Minimum width for terminal */
+#define MIN_HEIGHT 35       	/* Minimum height for terminal */
+#define TITLE_WINDOW_WIDTH  60	/* Title window width */
+#define TITLE_WINDOW_HEIGHT 29	/* Title window height */
 
 
 int main(int argc, char *argv[])
@@ -53,20 +55,18 @@ int main(int argc, char *argv[])
 
     int row, col;
     int strings = 6, staff_length = strings + 1;    // Default number of strings is 6
+    int titles = 6;
     
-    char proj_title[LENGTH];
-    char tuning[LENGTH];
-    char author[LENGTH];
-    char   song[LENGTH];
-    char tabbed[LENGTH];
-    char  email[LENGTH];
+    char title_window_labels[titles][LENGTH];
+    //char proj_title[LENGTH];
+    //char tuning[LENGTH];
+    //char author[LENGTH];
+    //char   song[LENGTH];
+    //char tabbed[LENGTH];
+    //char  email[LENGTH];
 
-     proj_title[0] = 0;
-         tuning[0] = 0;
-         author[0] = 0;
-           song[0] = 0;
-         tabbed[0] = 0;
-          email[0] = 0;   
+    for (i = 0; i < titles; i++)
+	title_window_labels[i][0] = 0;
 
 
     // Start screen
@@ -93,10 +93,11 @@ int main(int argc, char *argv[])
 
     
     // Header
-    header(col, tuning, author, song, tabbed, email);
+    header(col, title_window_labels[1], title_window_labels[2], title_window_labels[3], // <--- NEEDS TO PASS WHOLE LABEL ARRAY
+		title_window_labels[4], title_window_labels[5]);
 
     // Staffs
-    int printrow = HEADER_BUFFER;
+    int printrow = HEADER_BUFFER; // <-- SHOULD PROBABLY PUT THIS IN FUNCTION
     while (printrow < row) {
         staff(strings, printrow, col, tuning);
         printrow += staff_length;
@@ -104,12 +105,11 @@ int main(int argc, char *argv[])
     refresh();
 
     // Title Window
-    int width  = 60;
-    int height = 29;
-    int startx = (col - width) / 2;
-    int starty = (row - height) / 2;
     
-    title_win = title_info_win(height, width, starty, startx, strings);
+    int startx = (col - TITLE_WINDOW_WIDTH) / 2;
+    int starty = (row - TITLE_WINDOW_HEIGHT) / 2;
+    
+    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx, strings);
     keypad(title_win, true);
 
     int x_mins[8] = {
@@ -147,6 +147,7 @@ int main(int argc, char *argv[])
 
     int y, x, cur_tune = 0, cur_x = movements[0][1], ch, pos = 0,
         BUTTON_WIDTH = 8;
+
     wmove(title_win, movements[0][0], movements[0][1]);
     wrefresh(title_win);
 
@@ -208,8 +209,9 @@ int main(int argc, char *argv[])
                 }
             }
 
+	// NEED TO RENAME ALL LABEL ARRAYS
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-                   (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
+                    (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
             // Enter chars into char arrays
             if (pos == 0) {
                 proj_title[strlen(proj_title) - 1] = ch;
