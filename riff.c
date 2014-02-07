@@ -57,16 +57,11 @@ int main(int argc, char *argv[])
     int strings = 6, staff_length = strings + 1;    // Default number of strings is 6
     int titles = 6;
     
+    // Labels for the title window
     char title_window_labels[titles][LENGTH];
-    //char proj_title[LENGTH];
-    //char tuning[LENGTH];
-    //char author[LENGTH];
-    //char   song[LENGTH];
-    //char tabbed[LENGTH];
-    //char  email[LENGTH];
-
+    
     for (i = 0; i < titles; i++)
-	title_window_labels[i][0] = 0;
+	    title_window_labels[i][0] = 0;
 
 
     // Start screen
@@ -93,19 +88,17 @@ int main(int argc, char *argv[])
 
     
     // Header
-    header(col, title_window_labels[1], title_window_labels[2], title_window_labels[3], // <--- NEEDS TO PASS WHOLE LABEL ARRAY
-		title_window_labels[4], title_window_labels[5]);
+    header(col, title_window_labels);
 
     // Staffs
-    int printrow = HEADER_BUFFER; // <-- SHOULD PROBABLY PUT THIS IN FUNCTION
+    int printrow = HEADER_BUFFER;
     while (printrow < row) {
-        staff(strings, printrow, col, tuning);
+        staff(strings, printrow, col, title_window_labels[5]);
         printrow += staff_length;
     }
     refresh();
 
     // Title Window
-    
     int startx = (col - TITLE_WINDOW_WIDTH) / 2;
     int starty = (row - TITLE_WINDOW_HEIGHT) / 2;
     
@@ -120,7 +113,7 @@ int main(int argc, char *argv[])
                         WIN_X_BUFFER + strlen("Email:      "),
                         WIN_X_BUFFER + strlen("Number of Strings: "),
                         WIN_X_BUFFER + strlen("Tuning: (1)"),
-                        width - WIN_X_BUFFER - strlen("OK") - strlen("CANCEL") - 9,
+                        TITLE_WINDOW_WIDTH - WIN_X_BUFFER - strlen("OK") - strlen("CANCEL") - 9,
                     };
     
     int movements[8][2] = {
@@ -209,25 +202,12 @@ int main(int argc, char *argv[])
                 }
             }
 
-	// NEED TO RENAME ALL LABEL ARRAYS
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
                     (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
             // Enter chars into char arrays
-            if (pos == 0) {
-                proj_title[strlen(proj_title) - 1] = ch;
-                proj_title[strlen(proj_title)] = '\0';
-            } else if (pos == 1) {
-                song[strlen(song)-1] = ch;
-                song[strlen(song)] = '\0';
-            } else if (pos == 2) {
-                author[strlen(author)-1] = ch;
-                author[strlen(author)] = '\0';
-            } else if (pos == 3) {
-                tabbed[strlen(tabbed)-1] = ch;
-                tabbed[strlen(tabbed)] = '\0';
-            } else if (pos == 4) {
-                email[strlen(email)-1] = ch;
-                email[strlen(email)] = '\0';
+            if (pos != 5 && pos != 6) {
+                title_window_labels[pos][strlen(strlen(title_window_labels[pos])) - 1] = ch;
+                title_window_labels[pos][strlen(strlen(title_window_labels[pos]))] = '\0';
             } else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
                 strings = ch - '0';
                 //destroy_win(title_win);
@@ -261,25 +241,16 @@ int main(int argc, char *argv[])
                 wmove(title_win, movements[pos][0], movements[pos][1]);
             }
 
-        } else if (ch == 127 || ch == 8) {
+        } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
             if (x > x_mins[pos]) {
                 // Delete chars from arrays
-                if (pos == 0)
-                    proj_title[strlen(proj_title)-1] = '\0';
-                else if (pos == 1)
-                    song[strlen(song)-1] = '\0';
-                else if (pos == 2)
-                    author[strlen(author)-1] = '\0';
-                else if (pos == 3)
-                    tabbed[strlen(tabbed)-1] = '\0';
-                else if (pos == 4)
-                    email[strlen(email)-1] = '\0';
+                if (pos != 5)
+                    title_window_labesl[pos][strlen(title_window_labels[pos])-1] = '\0';
                 else if (pos == 5) {
                     strings = 6;
                     //destroy_win(title_win);
                     //title_win = title_info_win(height, width, starty, startx, strings);
-                } else if (pos == 6)
-                    tuning[strlen(tuning)-1] = '\0';
+                } 
 
                 // Movements
                 if (pos == 6) {

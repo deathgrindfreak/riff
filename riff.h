@@ -40,20 +40,20 @@
 
 
 /* header - prints the header at the top of the screen */
-void header(int col, char tuning[], char author[], char song[], char tabbed[], char email[]) {
+//void header(int col, char tuning[], char author[], char song[], char tabbed[], char email[]) {
+void header(int col, char labels[][]) {
 
     // Set to default values if not specified
-    if (tuning[0] == 0)
-        strcpy(tuning, "EADGBE");
-    if (author[0] == 0)
-        strcpy(author, "by Artist");
-    if (song[0] == 0)
-        strcpy(song, "Untitled");
-    if (tabbed[0] == 0)
-        strcpy(tabbed, "Tabbed By: _________________________");
-    if (email[0] == 0)
-        strcpy(email, "Email: _________________________");
-
+    if (labels[1][0] == 0)
+        strcpy(labels[1], "Untitled");
+    if (labels[2][0] == 0)
+        strcpy(labels[2], "by Artist");
+    if (labels[3][0] == 0)
+        strcpy(labels[3], "Tabbed By: _________________________");
+    if (labels[4][0] == 0)
+        strcpy(labels[4], "Email: _________________________");
+    if (labels[5][0] == 0)
+        strcpy(labels[5], "EADGBE");
 
     // Print Header
     init_pair(1, COLOR_RED, COLOR_BLACK);
@@ -61,13 +61,13 @@ void header(int col, char tuning[], char author[], char song[], char tabbed[], c
 
     attron(A_BOLD);
     attron(COLOR_PAIR(1));
-    print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
+    print_big_text(labels[1], Y_BUFFER - 1, (col - text_length(labels[1])) / 2);
     attroff(COLOR_PAIR(1));
 
-    mvprintw(Y_BUFFER + 3     , (col - strlen(author)) / 2       , "%s", author);
-    mvprintw(HEADER_BUFFER - 4, col - (strlen(tabbed) + X_BUFFER), "%s", tabbed);
-    mvprintw(HEADER_BUFFER - 3, col - (strlen(email) + X_BUFFER) , "%s", email);
-    mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s%s", "Tuning: ", tuning);
+    mvprintw(Y_BUFFER + 3     , (col - strlen(labels[2])) / 2       , "%s", labels[2]);
+    mvprintw(HEADER_BUFFER - 4, col - (strlen(labels[3]) + X_BUFFER), "%s", labels[3]);
+    mvprintw(HEADER_BUFFER - 3, col - (strlen(labels[4]) + X_BUFFER), "%s", labels[4]);
+    mvprintw(HEADER_BUFFER - 3, X_BUFFER                            , "%s%s", "Tuning: ", labels[5]);
     attroff(A_BOLD);
 
     refresh();
