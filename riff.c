@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     int tuning_moves[8] = { // 8 possible moves for the 8 individual strings
                             WIN_X_BUFFER + strlen("Tuning: (1)"),
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 6,
+                            WIN_X_BUFFER + strlen("Tuning: (1)") +     6,
                             WIN_X_BUFFER + strlen("Tuning: (1)") + 2 * 6,
                             WIN_X_BUFFER + strlen("Tuning: (1)") + 3 * 6,
                             WIN_X_BUFFER + strlen("Tuning: (1)") + 4 * 6,
@@ -200,8 +200,12 @@ int main(int argc, char *argv[])
                 strings = ch - '0';
                 destroy_win(title_win);
                 title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-            } else if ((pos == 6) && (ch == 'b' || (ch >= 'A' && ch <= 'G') || ch == '#')) {
-                label_push(pos, ch);
+                keypad(title_win, true);
+            } else if ((pos == 6) && (ch == 'b' || (ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g') || ch == '#')) {
+                if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
+                    label_push(pos, ch - 'a' + 'A');
+                else
+                    label_push(pos, ch);
             }
             
             // Movements
@@ -237,6 +241,7 @@ int main(int argc, char *argv[])
                     strings = 6;
                     destroy_win(title_win);
                     title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
+                    keypad(title_win, true);
                 } 
 
                 // Movements
@@ -259,6 +264,22 @@ int main(int argc, char *argv[])
             } else if (pos == 5) {
                 mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
                 wmove(title_win, movements[pos][0], x_mins[pos]);
+            }
+        } else if (ch == '\n') {    /* when user presses one of the buttons */
+            if (y == movements[7][0] && x == movements[7][1]) {
+                destroy_win(title_win);
+                clear();
+                header(col);
+                staff(row, col);
+                refresh();
+                break;
+            } else if (y == movements[7][0] && x == movements[7][1] + BUTTON_WIDTH) {
+                destroy_win(title_win);
+                clear();
+                header(col);
+                staff(row, col);
+                refresh();
+                break;
             }
         }
     }

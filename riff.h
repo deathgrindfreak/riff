@@ -40,14 +40,14 @@
 
 
 char title_window_labels[6][LENGTH];   /* labels for the title window */
-int strings = 6;                            /* number of guitar strings */
+int strings = 6;                       /* number of guitar strings */
 
 
-/* init_labels - initializes all labels to 0 */
+/* init_labels - initializes all labels to '\0' */
 void init_labels(void) {
     int i;
     for (i = 0; i < 6; i++)
-        title_window_labels[i][0] = 0;
+        title_window_labels[i][0] = '\0';
 }
 
 /* label_push - pushes a character to a specific label */
@@ -63,19 +63,28 @@ void label_del(int pos) {
     title_window_labels[pos][len] = '\0';
 }
 
+/* tuning_length - finds the true length of a guitar tuning */
+int tuning_length(char tuning[]) {
+    int i, len = 0;
+    for (i = 0; i < strlen(tuning); i++)
+        if (tuning[i] != '#' && tuning[i] != 'b')   /* if letter isn't a sharp or a flat */
+            len++;
+    return len;
+}
+
 /* header - prints the header at the top of the screen */
 void header(int col) {
 
     // Set to default values if not specified
-    if (title_window_labels[1][0] == 0)
+    if (strlen(title_window_labels[1]) == 0)
         strcpy(title_window_labels[1], "Untitled");
-    if (title_window_labels[2][0] == 0)
+    if (strlen(title_window_labels[2]) == 0)
         strcpy(title_window_labels[2], "by Artist");
-    if (title_window_labels[3][0] == 0)
+    if (strlen(title_window_labels[3]) == 0)
         strcpy(title_window_labels[3], "Tabbed by: ");
-    if (title_window_labels[4][0] == 0)
+    if (strlen(title_window_labels[4]) == 0)
         strcpy(title_window_labels[4], "Email: ");
-    if (title_window_labels[5][0] == 0)
+    if (strlen(title_window_labels[5]) == 0)
         strcpy(title_window_labels[5], "EADGBE");
 
     // Print Header
@@ -108,25 +117,25 @@ void measure(int row, int col) {
 /* staff - prints out the staff with the tuning included */
 void staff(int row, int col) {
 
-    int staff_length = strings + 1;    // Default number of strings is 6
+    int staff_length = strings + 1;
     int printrow = HEADER_BUFFER; 
     while (printrow < row) {
         int i, j, k;
         for (i = 0, j = 0; i < strings; i++) {
             // If tuning contains a flat or a sharp
             if (title_window_labels[5][strlen(title_window_labels[5]) - j - 1] == '#' || title_window_labels[5][strlen(title_window_labels[5]) - j - 1] == 'b') {
-                mvprintw(row + i, X_BUFFER - 1, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 2]);
-                mvprintw(row + i, X_BUFFER    , "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
+                mvprintw(printrow + i, X_BUFFER - 1, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 2]);
+                mvprintw(printrow + i, X_BUFFER    , "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
                 j += 2;
             } else {
-                mvprintw(row + i, X_BUFFER, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
+                mvprintw(printrow + i, X_BUFFER, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
                 ++j;
             }
-            mvprintw(row + i, X_BUFFER + 1, "%c", '|');
+            mvprintw(printrow + i, X_BUFFER + 1, "%c", '|');
             
             // Print the staff
             for (k = 0; k < col - (X_BUFFER + 4); k++) {
-                mvprintw(row + i, X_BUFFER + k + 2, "%c", '-');
+                mvprintw(printrow + i, X_BUFFER + k + 2, "%c", '-');
             }
         }
         printrow += staff_length;
@@ -141,15 +150,19 @@ WINDOW* title_info_win(int height, int width, int starty, int startx) {
     box(local_win, 0, 0);
 
     int i;
-    char title_welcome[] = "Welcome to Riff!";
+    char title_welcome[LENGTH];
+    char title_strings[LENGTH];
     char project[LENGTH];
     char song[LENGTH];
     char artist[LENGTH];
     char tabbed[LENGTH];
+    char tuning[LENGTH];
     char email[LENGTH];
 
-    
-    if (title_window_labels[0] == 0) {
+    strcpy(title_welcome, "Welcome to Riff!");
+
+
+    if (strlen(title_window_labels[0]) == 0) {
         strcpy(project, "Project Title: ________________________________________");
     } else {
         strcpy(project, "Project Title: ");
@@ -204,14 +217,14 @@ WINDOW* title_info_win(int height, int width, int starty, int startx) {
             strcat(email, "_");
     }
     
-    char title_strings[] = "Number of Strings: ";
+    strcpy(title_strings, "Number of Strings: ");
     int len = strlen(title_strings);
     title_strings[len] = strings + '0';
     title_strings[len+1] = '\0';
 
     char s[2]; 
     s[1] = '\0';
-    char tuning[] = "Tuning: ";
+    strcpy(tuning, "Tuning: ");
     if (strings >= 4 && strings <= 8) {
         for (i = 1; i <= strings; i++) {
             s[0] = i + '0';
