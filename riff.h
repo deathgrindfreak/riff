@@ -39,21 +39,44 @@
 #define MIN_HEIGHT 35       /* Minimum height for terminal */
 
 
+char title_window_labels[6][LENGTH];   /* labels for the title window */
+int strings = 6;                            /* number of guitar strings */
+
+
+/* init_labels - initializes all labels to 0 */
+void init_labels(void) {
+    int i;
+    for (i = 0; i < 6; i++)
+        title_window_labels[i][0] = 0;
+}
+
+/* label_push - pushes a character to a specific label */
+void label_push(int pos, char ch) {
+    int len = strlen(title_window_labels[pos]);
+    title_window_labels[pos][len] = ch;
+    title_window_labels[pos][len+1] = '\0';
+}
+
+/* label_del - deletes the top character from specific label */
+void label_del(int pos) {
+    int len = strlen(title_window_labels[pos]);
+    title_window_labels[pos][len] = '\0';
+}
+
 /* header - prints the header at the top of the screen */
-//void header(int col, char tuning[], char author[], char song[], char tabbed[], char email[]) {
-void header(int col, char labels[][]) {
+void header(int col) {
 
     // Set to default values if not specified
-    if (labels[1][0] == 0)
-        strcpy(labels[1], "Untitled");
-    if (labels[2][0] == 0)
-        strcpy(labels[2], "by Artist");
-    if (labels[3][0] == 0)
-        strcpy(labels[3], "Tabbed By: _________________________");
-    if (labels[4][0] == 0)
-        strcpy(labels[4], "Email: _________________________");
-    if (labels[5][0] == 0)
-        strcpy(labels[5], "EADGBE");
+    if (title_window_labels[1][0] == 0)
+        strcpy(title_window_labels[1], "Untitled");
+    if (title_window_labels[2][0] == 0)
+        strcpy(title_window_labels[2], "by Artist");
+    if (title_window_labels[3][0] == 0)
+        strcpy(title_window_labels[3], "Tabbed by: ");
+    if (title_window_labels[4][0] == 0)
+        strcpy(title_window_labels[4], "Email: ");
+    if (title_window_labels[5][0] == 0)
+        strcpy(title_window_labels[5], "EADGBE");
 
     // Print Header
     init_pair(1, COLOR_RED, COLOR_BLACK);
@@ -61,20 +84,20 @@ void header(int col, char labels[][]) {
 
     attron(A_BOLD);
     attron(COLOR_PAIR(1));
-    print_big_text(labels[1], Y_BUFFER - 1, (col - text_length(labels[1])) / 2);
+    print_big_text(title_window_labels[1], Y_BUFFER - 1, (col - text_length(title_window_labels[1])) / 2);
     attroff(COLOR_PAIR(1));
 
-    mvprintw(Y_BUFFER + 3     , (col - strlen(labels[2])) / 2       , "%s", labels[2]);
-    mvprintw(HEADER_BUFFER - 4, col - (strlen(labels[3]) + X_BUFFER), "%s", labels[3]);
-    mvprintw(HEADER_BUFFER - 3, col - (strlen(labels[4]) + X_BUFFER), "%s", labels[4]);
-    mvprintw(HEADER_BUFFER - 3, X_BUFFER                            , "%s%s", "Tuning: ", labels[5]);
+    mvprintw(Y_BUFFER + 3     , (col - strlen(title_window_labels[2])) / 2       , "%s", title_window_labels[2]);
+    mvprintw(HEADER_BUFFER - 4, col - (55 + X_BUFFER), "%s", title_window_labels[3]);
+    mvprintw(HEADER_BUFFER - 3, col - (55 + X_BUFFER), "%s", title_window_labels[4]);
+    mvprintw(HEADER_BUFFER - 3, X_BUFFER             , "%s%s", "Tuning: ", title_window_labels[5]);
     attroff(A_BOLD);
 
     refresh();
 }
 
 /* measure - inserts a measure at (y, x) == (row, col) */
-void measure(int strings, int row, int col) {
+void measure(int row, int col) {
     
     int i;
     for (i = 0; i < strings; i++) {
@@ -83,54 +106,118 @@ void measure(int strings, int row, int col) {
 }
 
 /* staff - prints out the staff with the tuning included */
-void staff(int strings, int row, int max_col, char tuning[]) {
+void staff(int row, int col) {
 
-    int i, j, k;
-    for (i = 0, j = 0; i < strings; i++) {
-        // If tuning contains a flat or a sharp
-        if (tuning[strlen(tuning) - j - 1] == '#' || tuning[strlen(tuning) - j - 1] == 'b') {
-            mvprintw(row + i, X_BUFFER - 1, "%c", tuning[strlen(tuning) - j - 2]);
-            mvprintw(row + i, X_BUFFER    , "%c", tuning[strlen(tuning) - j - 1]);
-            j += 2;
-        } else {
-            mvprintw(row + i, X_BUFFER, "%c", tuning[strlen(tuning) - j - 1]);
-            ++j;
+    int staff_length = strings + 1;    // Default number of strings is 6
+    int printrow = HEADER_BUFFER; 
+    while (printrow < row) {
+        int i, j, k;
+        for (i = 0, j = 0; i < strings; i++) {
+            // If tuning contains a flat or a sharp
+            if (title_window_labels[5][strlen(title_window_labels[5]) - j - 1] == '#' || title_window_labels[5][strlen(title_window_labels[5]) - j - 1] == 'b') {
+                mvprintw(row + i, X_BUFFER - 1, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 2]);
+                mvprintw(row + i, X_BUFFER    , "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
+                j += 2;
+            } else {
+                mvprintw(row + i, X_BUFFER, "%c", title_window_labels[5][strlen(title_window_labels[5]) - j - 1]);
+                ++j;
+            }
+            mvprintw(row + i, X_BUFFER + 1, "%c", '|');
+            
+            // Print the staff
+            for (k = 0; k < col - (X_BUFFER + 4); k++) {
+                mvprintw(row + i, X_BUFFER + k + 2, "%c", '-');
+            }
         }
-        mvprintw(row + i, X_BUFFER + 1, "%c", '|');
-        
-        // Print the staff
-        for (k = 0; k < max_col - (X_BUFFER + 4); k++) {
-            mvprintw(row + i, X_BUFFER + k + 2, "%c", '-');
-        }
+        printrow += staff_length;
     }
 }
 
 /* Creates the title info window and prints the associated labels */
-WINDOW* title_info_win(int height, int width, int starty, int startx, int strings) {
+WINDOW* title_info_win(int height, int width, int starty, int startx) {
     WINDOW *local_win;
 
     local_win = newwin(height, width, starty, startx);
     box(local_win, 0, 0);
 
-    char title_welcome[]       = "Welcome to Riff!";
-    char title_project_title[] = "Project Title: ________________________________________ ";
-    char title_song_title[]    = "Song Title: ___________________________________________ ";
-    char title_artist[]        = "Artist:     ___________________________________________ ";
-    char title_tabbed[]        = "Tabbed by:  ___________________________________________ ";
-    char title_email[]         = "Email:      ___________________________________________ ";
-    char title_strings[]       = "Number of Strings: _";
-    char title_tuning[LENGTH];
-
     int i;
+    char title_welcome[] = "Welcome to Riff!";
+    char project[LENGTH];
+    char song[LENGTH];
+    char artist[LENGTH];
+    char tabbed[LENGTH];
+    char email[LENGTH];
+
+    
+    if (title_window_labels[0] == 0) {
+        strcpy(project, "Project Title: ________________________________________");
+    } else {
+        strcpy(project, "Project Title: ");
+        strcat(project, title_window_labels[0]);
+        int total_length = strlen("Project Title: ________________________________________");
+        int end = strlen(project);
+        for (i = end; i < total_length; i++)
+            strcat(project, "_");
+    }
+    
+    if (!strcmp(title_window_labels[1], "Untitled")) {
+        strcpy(song, "Song Title: ___________________________________________");
+    } else {
+        strcpy(song, "Song Title: ");
+        strcat(song, title_window_labels[1]);
+        int total_length = strlen("Song Title: ___________________________________________");
+        int end = strlen(song);
+        for (i = end; i < total_length; i++)
+            strcat(song, "_");
+    }
+    
+    if (!strcmp(title_window_labels[2], "by Artist")) {
+        strcpy(artist, "Artist:     ___________________________________________");
+    } else {
+        strcpy(artist, "Artist:     ");
+        strcat(artist, title_window_labels[2]);
+        int total_length = strlen("Artist:     ___________________________________________");
+        int end = strlen(artist);
+        for (i = end; i < total_length; i++)
+            strcat(artist, "_");
+    }
+    
+    if (!strcmp(title_window_labels[3], "Tabbed by: ")) {
+        strcpy(tabbed, "Tabbed by:  ___________________________________________");
+    } else {
+        strcpy(tabbed, "Tabbed by:  ");
+        strcat(tabbed, title_window_labels[3]);
+        int total_length = strlen("Tabbed by:  ___________________________________________");
+        int end = strlen(tabbed);
+        for (i = end; i < total_length; i++)
+            strcat(tabbed, "_");
+    }
+    
+    if (!strcmp(title_window_labels[4], "Email: ")) {
+        strcpy(email, "Email:      ___________________________________________");
+    } else {
+        strcpy(email, "Email:      ");
+        strcat(email, title_window_labels[4]);
+        int total_length = strlen("Email:      ___________________________________________");
+        int end = strlen(email);
+        for (i = end; i < total_length; i++)
+            strcat(email, "_");
+    }
+    
+    char title_strings[] = "Number of Strings: ";
+    int len = strlen(title_strings);
+    title_strings[len] = strings + '0';
+    title_strings[len+1] = '\0';
+
     char s[2]; 
     s[1] = '\0';
-    strcpy(title_tuning, "Tuning: ");
+    char tuning[] = "Tuning: ";
     if (strings >= 4 && strings <= 8) {
         for (i = 1; i <= strings; i++) {
             s[0] = i + '0';
-            strcat(title_tuning, "(");
-            strcat(title_tuning, s);
-            strcat(title_tuning, ")__ ");
+            strcat(tuning, "(");
+            strcat(tuning, s);
+            strcat(tuning, ")__ ");
         }
     }
 
@@ -140,23 +227,24 @@ WINDOW* title_info_win(int height, int width, int starty, int startx, int string
     mvwprintw(local_win, WIN_Y_BUFFER, (width - strlen(title_welcome)) / 2, "%s", title_welcome);
     wattroff(local_win, A_BOLD);
 
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER     , WIN_X_BUFFER, "%s", title_project_title);
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 4 , WIN_X_BUFFER, "%s", title_song_title);
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 6 , WIN_X_BUFFER, "%s", title_artist);
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 8 , WIN_X_BUFFER, "%s", title_tabbed);
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 10, WIN_X_BUFFER, "%s", title_email);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER     , WIN_X_BUFFER, "%s", project);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 4 , WIN_X_BUFFER, "%s", song);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 6 , WIN_X_BUFFER, "%s", artist);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 8 , WIN_X_BUFFER, "%s", tabbed);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 10, WIN_X_BUFFER, "%s", email);
     mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 14, WIN_X_BUFFER, "%s", title_strings);
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 16, WIN_X_BUFFER, "%s", title_tuning);
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 16, WIN_X_BUFFER, "%s", tuning);
     
     // "Buttons"
     int BUTTON_BUFFER = width - WIN_Y_BUFFER - strlen("OK") - strlen("CANCEL") - 11;
 
     wattron(local_win, A_REVERSE | A_BOLD);
     mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 19, BUTTON_BUFFER    , "%s", "      ");
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 19, BUTTON_BUFFER + 8, "%s", "          ");
     mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 20, BUTTON_BUFFER    , "%s", "  OK  ");
-    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 20, BUTTON_BUFFER + 8, "%s", "  CANCEL  ");
     mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 21, BUTTON_BUFFER    , "%s", "      ");
+    
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 19, BUTTON_BUFFER + 8, "%s", "          ");
+    mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 20, BUTTON_BUFFER + 8, "%s", "  CANCEL  ");
     mvwprintw(local_win, WIN_Y_BUFFER + WIN_HEADER + 21, BUTTON_BUFFER + 8, "%s", "          ");
     wattroff(local_win, A_REVERSE | A_BOLD);
 

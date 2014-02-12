@@ -54,14 +54,6 @@ int main(int argc, char *argv[])
     WINDOW *title_win;  // Title window pointer
 
     int row, col;
-    int strings = 6, staff_length = strings + 1;    // Default number of strings is 6
-    int titles = 6;
-    
-    // Labels for the title window
-    char title_window_labels[titles][LENGTH];
-    
-    for (i = 0; i < titles; i++)
-	    title_window_labels[i][0] = 0;
 
 
     // Start screen
@@ -88,21 +80,18 @@ int main(int argc, char *argv[])
 
     
     // Header
-    header(col, title_window_labels);
+    init_labels();
+    header(col);
 
     // Staffs
-    int printrow = HEADER_BUFFER;
-    while (printrow < row) {
-        staff(strings, printrow, col, title_window_labels[5]);
-        printrow += staff_length;
-    }
+    staff(row, col);
     refresh();
 
     // Title Window
     int startx = (col - TITLE_WINDOW_WIDTH) / 2;
     int starty = (row - TITLE_WINDOW_HEIGHT) / 2;
     
-    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx, strings);
+    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
     keypad(title_win, true);
 
     int x_mins[8] = {
@@ -161,7 +150,7 @@ int main(int argc, char *argv[])
             }
 
         } else if (ch == KEY_LEFT) {
-            if (x > movements[pos][1] && x <= width - 2 * WIN_X_BUFFER) {
+            if (x > movements[pos][1] && x <= TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
                 if (pos != 5 && pos != 6 && pos != 7) {
                     --cur_x;
                     wmove(title_win, movements[pos][0], cur_x);
@@ -182,7 +171,7 @@ int main(int argc, char *argv[])
             }
 
         } else if (ch == KEY_RIGHT) {
-            if (x >= movements[pos][1] && x < width - 2 * WIN_X_BUFFER) {
+            if (x >= movements[pos][1] && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
                 if (pos != 5 && pos != 6 && pos != 7) {
                     ++cur_x;
                     wmove(title_win, movements[pos][0], cur_x);
@@ -203,18 +192,16 @@ int main(int argc, char *argv[])
             }
 
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-                    (ch >= 33 && ch <= 46)) && x < width - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
+                    (ch >= 33 && ch <= 46)) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
             // Enter chars into char arrays
             if (pos != 5 && pos != 6) {
-                title_window_labels[pos][strlen(strlen(title_window_labels[pos])) - 1] = ch;
-                title_window_labels[pos][strlen(strlen(title_window_labels[pos]))] = '\0';
+                label_push(pos, ch);
             } else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
                 strings = ch - '0';
-                //destroy_win(title_win);
-                //title_win = title_info_win(height, width, starty, startx, strings);
+                destroy_win(title_win);
+                title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
             } else if ((pos == 6) && (ch == 'b' || (ch >= 'A' && ch <= 'G') || ch == '#')) {
-                tuning[strlen(tuning)-1] = ch;
-                tuning[strlen(tuning)] = '\0';
+                label_push(pos, ch);
             }
             
             // Movements
@@ -244,12 +231,12 @@ int main(int argc, char *argv[])
         } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
             if (x > x_mins[pos]) {
                 // Delete chars from arrays
-                if (pos != 5)
-                    title_window_labesl[pos][strlen(title_window_labels[pos])-1] = '\0';
-                else if (pos == 5) {
+                if (pos != 5) {
+                    label_del(pos);
+                } else if (pos == 5) {
                     strings = 6;
-                    //destroy_win(title_win);
-                    //title_win = title_info_win(height, width, starty, startx, strings);
+                    destroy_win(title_win);
+                    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
                 } 
 
                 // Movements
