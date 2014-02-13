@@ -256,7 +256,7 @@ void print_big_text(char input[], int row, int col) {
 
         // Whitespace
         if (input[i] == ' ') {
-            ++col;
+            col += 2;
 
         // Letters
         } else if (input[i] >= 'a' && input[i] <= 'z') {
