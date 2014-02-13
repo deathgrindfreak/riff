@@ -79,8 +79,8 @@ void header(int col) {
     char song[LENGTH];
     char artist[LENGTH];
     char tabbed[LENGTH];
-    char tuning[LENGTH];
     char email[LENGTH];
+    char tuning[LENGTH];
 
     // Set to default values if not specified
     // Otherwise, copy the labels
@@ -189,8 +189,8 @@ WINDOW* title_info_win(int height, int width, int starty, int startx) {
     char song[LENGTH];
     char artist[LENGTH];
     char tabbed[LENGTH];
-    char tuning[LENGTH];
     char email[LENGTH];
+    char tuning[LENGTH];
 
     strcpy(title_welcome, "Welcome to Riff!");
 
