@@ -1,7 +1,7 @@
 //TODO
 
+* Replace inputting into arrays with fields instead.  This should get rid of some of the weird behavior with the header printing.
 * Make sure that ALL special characters are able to inputted (or restricted) into the appropriate label.  I.E., whitespace and underscore for project title.
-* There are some redundancies with the if-else statements in the title window while loop, need to combine a few of these.
 * Fix tuning issues - Input doesn't allow user to enter one letter only (i.e. without accidentals), it simply moves back to the skipped space, inputs the letter 
   and locks down.  Also doesn't allow an accidental on eighth string when using an 8 string mode.  Need to also allow users to input lower case characters in 
   the first slot, where they will be replaced by the upper case value.
