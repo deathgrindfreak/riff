@@ -48,7 +48,6 @@ void init_labels(void) {
     int i;
     for (i = 0; i < 6; i++)
         title_window_labels[i][0] = '\0';
-    strcpy(title_window_labels[5], "EADGBE");
 }
 
 /* label_push - pushes a character to a specific label */

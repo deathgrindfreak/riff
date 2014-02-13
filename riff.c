@@ -193,6 +193,14 @@ int main(int argc, char *argv[])
         /* ch is a letter, number or special char */
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
                     (ch >= 33 && ch <= 46) || ch == ' ' || ch == 64) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
+
+            //TEMP
+            int i;
+            for (i = 0; i < 6; i++)
+                mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
+            wrefresh(title_win);
+            //TEMP
+            
             if (pos != 5 && pos != 6) {
                 label_push(pos, ch);
                 mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
@@ -213,9 +221,9 @@ int main(int argc, char *argv[])
                                      (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
 
                 if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
-                    label_push(pos, ch - 'a' + 'A');
+                    label_push(pos-1, ch - 'a' + 'A');
                 else
-                    label_push(pos, ch);
+                    label_push(pos-1, ch);
 
                 if (cur_tune < strings-1) {
                     if (x == tuning_moves[cur_tune] + 1) {
@@ -231,6 +239,15 @@ int main(int argc, char *argv[])
             }
 
         } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
+
+
+            //TEMP
+            int i;
+            for (i = 0; i < 6; i++)
+                mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
+            wrefresh(title_win);
+            //TEMP
+
             if (x > x_mins[pos]) {
                 if (pos != 5 && pos != 6) {
                     label_del(pos);
