@@ -43,11 +43,12 @@ char title_window_labels[6][LENGTH];   /* labels for the title window */
 int strings = 6;                       /* number of guitar strings */
 
 
-/* init_labels - initializes all labels to '\0' */
+/* init_labels - initializes all labels to '\0', except for tuning */
 void init_labels(void) {
     int i;
     for (i = 0; i < 6; i++)
         title_window_labels[i][0] = '\0';
+    strcpy(title_window_labels[5], "EADGBE");
 }
 
 /* label_push - pushes a character to a specific label */
@@ -60,7 +61,7 @@ void label_push(int pos, char ch) {
 /* label_del - deletes the top character from specific label */
 void label_del(int pos) {
     int len = strlen(title_window_labels[pos]);
-    title_window_labels[pos][len] = '\0';
+    title_window_labels[pos][len-1] = '\0';
 }
 
 /* tuning_length - finds the true length of a guitar tuning */
@@ -75,17 +76,44 @@ int tuning_length(char tuning[]) {
 /* header - prints the header at the top of the screen */
 void header(int col) {
 
+    // Strings for printing to header
+    char song[LENGTH];
+    char artist[LENGTH];
+    char tabbed[LENGTH];
+    char tuning[LENGTH];
+    char email[LENGTH];
+
     // Set to default values if not specified
+    // Otherwise, copy the labels
     if (strlen(title_window_labels[1]) == 0)
-        strcpy(title_window_labels[1], "Untitled");
+        strcpy(song, "Untitled");
+    else
+        strcpy(song, title_window_labels[1]);
+
     if (strlen(title_window_labels[2]) == 0)
-        strcpy(title_window_labels[2], "by Artist");
+        strcpy(artist, "by Artist");
+    else {
+        strcpy(artist, "by ");
+        strcat(artist, title_window_labels[2]);
+    }
+
     if (strlen(title_window_labels[3]) == 0)
-        strcpy(title_window_labels[3], "Tabbed by: ");
+        strcpy(tabbed, "Tabbed by: ________________________");
+    else {
+        strcpy(tabbed, "Tabbed by: ");
+        strcat(tabbed, title_window_labels[3]);
+    }
+
     if (strlen(title_window_labels[4]) == 0)
-        strcpy(title_window_labels[4], "Email: ");
-    if (strlen(title_window_labels[5]) == 0)
-        strcpy(title_window_labels[5], "EADGBE");
+        strcpy(email, "Email: ____________________________");
+    else {
+        strcpy(tabbed, "Email: ");
+        strcat(tabbed, title_window_labels[4]);
+    }
+
+    strcpy(tuning, "Tuning: ");
+    strcat(tuning, title_window_labels[5]);
+
 
     // Print Header
     init_pair(1, COLOR_RED, COLOR_BLACK);
@@ -93,13 +121,19 @@ void header(int col) {
 
     attron(A_BOLD);
     attron(COLOR_PAIR(1));
-    print_big_text(title_window_labels[1], Y_BUFFER - 1, (col - text_length(title_window_labels[1])) / 2);
+    print_big_text(song, Y_BUFFER - 1, (col - text_length(song)) / 2);
     attroff(COLOR_PAIR(1));
 
-    mvprintw(Y_BUFFER + 3     , (col - strlen(title_window_labels[2])) / 2       , "%s", title_window_labels[2]);
-    mvprintw(HEADER_BUFFER - 4, col - (55 + X_BUFFER), "%s", title_window_labels[3]);
-    mvprintw(HEADER_BUFFER - 3, col - (55 + X_BUFFER), "%s", title_window_labels[4]);
-    mvprintw(HEADER_BUFFER - 3, X_BUFFER             , "%s%s", "Tuning: ", title_window_labels[5]);
+    int tab_offset = strlen("Tabbed by: ________________________") + X_BUFFER;
+    if (strlen(tabbed) > tab_offset)
+        tab_offset = strlen(tabbed);
+    if (strlen(email) > tab_offset)
+        tab_offset = strlen(email);
+
+    mvprintw(Y_BUFFER + 3     , (col - strlen(artist)) / 2       , "%s", artist);
+    mvprintw(HEADER_BUFFER - 4, col - tab_offset, "%s", tabbed);
+    mvprintw(HEADER_BUFFER - 3, col - tab_offset, "%s", email);
+    mvprintw(HEADER_BUFFER - 3, X_BUFFER                         , "%s", tuning);
     attroff(A_BOLD);
 
     refresh();

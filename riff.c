@@ -190,31 +190,33 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-
+        /* ch is a letter, number or special char */
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-                    (ch >= 33 && ch <= 46)) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {   // ch is a letter, number or special char
-            // Enter chars into char arrays
+                    (ch >= 33 && ch <= 46) || ch == ' ' || ch == 64) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
             if (pos != 5 && pos != 6) {
                 label_push(pos, ch);
+                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
+                ++movements[pos][1];
+                wmove(title_win, movements[pos][0], movements[pos][1]);
+
             } else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
                 strings = ch - '0';
+
                 destroy_win(title_win);
                 title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
                 keypad(title_win, true);
-            } else if ((pos == 6) && (ch == 'b' || (ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g') || ch == '#')) {
+
+                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
+                wmove(title_win, movements[pos][0], x_mins[pos]);
+
+            } else if (pos == 6  && ((x == tuning_moves[cur_tune] && ((ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g'))) ||
+                                     (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
+
                 if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
                     label_push(pos, ch - 'a' + 'A');
                 else
                     label_push(pos, ch);
-            }
-            
-            // Movements
-            if (pos == 5 && (ch >= '4' && ch <= '8')) {
-                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
-                wmove(title_win, movements[pos][0], x_mins[pos]);
-            } else if (pos == 6  && ((x == tuning_moves[cur_tune] && ch >= 'A' && ch <= 'G') ||
-                                     (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
-                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
+
                 if (cur_tune < strings-1) {
                     if (x == tuning_moves[cur_tune] + 1) {
                         ++cur_tune;
@@ -226,26 +228,16 @@ int main(int argc, char *argv[])
                     ++movements[pos][1];
                     wmove(title_win, movements[pos][0], movements[pos][1]);
                 }
-            } else if (pos != 5 && pos != 6) {
-                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
-                ++movements[pos][1];
-                wmove(title_win, movements[pos][0], movements[pos][1]);
             }
 
         } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
             if (x > x_mins[pos]) {
-                // Delete chars from arrays
-                if (pos != 5) {
+                if (pos != 5 && pos != 6) {
                     label_del(pos);
-                } else if (pos == 5) {
-                    strings = 6;
-                    destroy_win(title_win);
-                    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-                    keypad(title_win, true);
-                } 
-
-                // Movements
-                if (pos == 6) {
+                    --movements[pos][1];
+                    mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
+                    wmove(title_win, movements[pos][0], movements[pos][1]);
+                } else if (pos == 6) {
                     if (x == tuning_moves[cur_tune] + 1 || x == tuning_moves[strings-1] + 2) {
                         --movements[pos][1];
                         mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
@@ -256,24 +248,27 @@ int main(int argc, char *argv[])
                         mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
                         wmove(title_win, movements[pos][0], movements[pos][1]);   
                     }
-                } else if (pos != 5 && pos != 6){
-                    --movements[pos][1];
-                    mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
                 }
             } else if (pos == 5) {
+                strings = 6;
+                destroy_win(title_win);
+                title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
+                keypad(title_win, true);
                 mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
                 wmove(title_win, movements[pos][0], x_mins[pos]);
             }
         } else if (ch == '\n') {    /* when user presses one of the buttons */
-            if (y == movements[7][0] && x == movements[7][1]) {
+            if (pos != 7) {
+                ++pos;
+                wmove(title_win, movements[pos][0], movements[pos][1]);   
+            } else if (y == movements[7][0] && x == movements[7][1]) { /* "OK" button */
                 destroy_win(title_win);
                 clear();
                 header(col);
                 staff(row, col);
                 refresh();
                 break;
-            } else if (y == movements[7][0] && x == movements[7][1] + BUTTON_WIDTH) {
+            } else if (y == movements[7][0] && x == movements[7][1] + BUTTON_WIDTH) { /* "CANCEL" button */
                 destroy_win(title_win);
                 clear();
                 header(col);
