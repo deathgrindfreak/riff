@@ -195,65 +195,12 @@ WINDOW* title_info_win(int height, int width, int starty, int startx) {
     strcpy(title_welcome, "Welcome to Riff!");
 
 
-    if (strlen(title_window_labels[0]) == 0) {
-        strcpy(project, "Project Title: ________________________________________");
-    } else {
-        strcpy(project, "Project Title: ");
-        strcat(project, title_window_labels[0]);
-        int total_length = strlen("Project Title: ________________________________________");
-        int end = strlen(project);
-        for (i = end; i < total_length; i++)
-            strcat(project, "_");
-    }
-    
-    if (!strcmp(title_window_labels[1], "Untitled")) {
-        strcpy(song, "Song Title: ___________________________________________");
-    } else {
-        strcpy(song, "Song Title: ");
-        strcat(song, title_window_labels[1]);
-        int total_length = strlen("Song Title: ___________________________________________");
-        int end = strlen(song);
-        for (i = end; i < total_length; i++)
-            strcat(song, "_");
-    }
-    
-    if (!strcmp(title_window_labels[2], "by Artist")) {
-        strcpy(artist, "Artist:     ___________________________________________");
-    } else {
-        strcpy(artist, "Artist:     ");
-        strcat(artist, title_window_labels[2]);
-        int total_length = strlen("Artist:     ___________________________________________");
-        int end = strlen(artist);
-        for (i = end; i < total_length; i++)
-            strcat(artist, "_");
-    }
-    
-    if (!strcmp(title_window_labels[3], "Tabbed by: ")) {
-        strcpy(tabbed, "Tabbed by:  ___________________________________________");
-    } else {
-        strcpy(tabbed, "Tabbed by:  ");
-        strcat(tabbed, title_window_labels[3]);
-        int total_length = strlen("Tabbed by:  ___________________________________________");
-        int end = strlen(tabbed);
-        for (i = end; i < total_length; i++)
-            strcat(tabbed, "_");
-    }
-    
-    if (!strcmp(title_window_labels[4], "Email: ")) {
-        strcpy(email, "Email:      ___________________________________________");
-    } else {
-        strcpy(email, "Email:      ");
-        strcat(email, title_window_labels[4]);
-        int total_length = strlen("Email:      ___________________________________________");
-        int end = strlen(email);
-        for (i = end; i < total_length; i++)
-            strcat(email, "_");
-    }
-    
+    strcpy(project, "Project Title: ");
+    strcpy(song, "Song Title: ");
+    strcpy(artist, "Artist: ");
+    strcpy(tabbed, "Tabbed by: ");
+    strcpy(email, "Email: ");
     strcpy(title_strings, "Number of Strings: ");
-    int len = strlen(title_strings);
-    title_strings[len] = strings + '0';
-    title_strings[len+1] = '\0';
 
     char s[2]; 
     s[1] = '\0';

@@ -28,9 +28,10 @@
  ************************************************************************************/
 
 
-#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ncurses.h>
+#include <form.h>
 #include "big_text.h"
 #include "riff.h"
 
