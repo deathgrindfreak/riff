@@ -27,6 +27,7 @@
  * either expressed or implied, of the FreeBSD Project.                             *
  ************************************************************************************/
 
+#include "riff.h"
 
 char letters[26][3][6] = {{"____", 
                            "|__|", 

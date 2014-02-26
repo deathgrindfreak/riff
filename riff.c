@@ -29,6 +29,7 @@
 
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <ncurses.h>
 #include <form.h>
@@ -36,23 +37,16 @@
 #include "riff.h"
 
 
-#define HEADER_BUFFER 12    	/* y buffer spacing for header */
-#define X_BUFFER 2          	/* x buffer for side spacing */
-#define Y_BUFFER 2          	/* y buffer for top spacing */
-#define LENGTH 100          	/* Length for arrays */
-#define WIN_HEADER 3        	/* y buffer spacing for window header */
-#define WIN_X_BUFFER 2      	/* x buffer spacing for window */
-#define WIN_Y_BUFFER 2      	/* y buffer spacing for window */
-#define MIN_WIDTH 70        	/* Minimum width for terminal */
-#define MIN_HEIGHT 35       	/* Minimum height for terminal */
-#define TITLE_WINDOW_WIDTH  60	/* Title window width */
-#define TITLE_WINDOW_HEIGHT 29	/* Title window height */
-
-
 int main(int argc, char *argv[])
 {
     // Initial values
     WINDOW *title_win;  // Title window pointer
+    //FIELD  *fields[7];
+    FORM   *title_form;
+
+    int i;
+    for (i = 0; i < 7; i++)
+        fields[i] = NULL;
 
     int row, col;
 
@@ -81,7 +75,6 @@ int main(int argc, char *argv[])
 
     
     // Header
-    init_labels();
     header(col);
 
     // Staffs
@@ -105,7 +98,46 @@ int main(int argc, char *argv[])
                         WIN_X_BUFFER + strlen("Tuning: (1)"),
                         TITLE_WINDOW_WIDTH - WIN_X_BUFFER - strlen("OK") - strlen("CANCEL") - 9,
                     };
+
     
+    
+    /* Input fields for windows */
+    fields[0] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[0] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER     , x_mins[0], 0, 0); 
+    fields[1] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[1] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 4 , x_mins[1], 0, 0); 
+    fields[2] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[2] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 6 , x_mins[2], 0, 0); 
+    fields[3] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[3] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 8 , x_mins[3], 0, 0); 
+    fields[4] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[4] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 10, x_mins[4], 0, 0); 
+    fields[5] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[5] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 14, x_mins[5], 0, 0); 
+    fields[6] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[6] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 16, x_mins[6], 0, 0); 
+    fields[7];
+    
+    set_field_back(fields[0], A_UNDERLINE);
+    field_opts_off(fields[0], O_AUTOSKIP);
+
+    set_field_back(fields[1], A_UNDERLINE);
+    field_opts_off(fields[1], O_AUTOSKIP);
+
+    set_field_back(fields[2], A_UNDERLINE);
+    field_opts_off(fields[2], O_AUTOSKIP);
+
+    set_field_back(fields[3], A_UNDERLINE);
+    field_opts_off(fields[3], O_AUTOSKIP);
+
+    set_field_back(fields[4], A_UNDERLINE);
+    field_opts_off(fields[4], O_AUTOSKIP);
+
+    set_field_back(fields[5], A_UNDERLINE);
+    field_opts_off(fields[5], O_AUTOSKIP);
+
+    set_field_back(fields[6], A_UNDERLINE);
+    field_opts_off(fields[6], O_AUTOSKIP);
+    
+    /* Create the title window form */
+    set_form_win(title_form, title_win);
+    title_form = new_form(fields);
+    post_form(title_form);
+    refresh();
+
     int movements[8][2] = {
                             {WIN_Y_BUFFER + WIN_HEADER      , x_mins[0]},
                             {WIN_Y_BUFFER + WIN_HEADER + 4  , x_mins[1]},
@@ -134,147 +166,102 @@ int main(int argc, char *argv[])
     wmove(title_win, movements[0][0], movements[0][1]);
     wrefresh(title_win);
 
-    while (1) {
+    while (true) {
         ch = wgetch(title_win);
         getyx(title_win, y, x);
         cur_x = x;
         if (ch ==  KEY_UP) {
-            if (pos != 0) {   // Not at top input label
-                --pos;
-                wmove(title_win, movements[pos][0], movements[pos][1]);
-            }
-
+            form_driver(title_form, REQ_PREV_FIELD);
+            form_driver(title_form, REQ_END_LINE);
         } else if (ch == KEY_DOWN) {
-            if (pos != 7) {   // Not at bottom input label
-                ++pos;
-                wmove(title_win, movements[pos][0], movements[pos][1]);
-            }
+            form_driver(title_form, REQ_NEXT_FIELD);
+            form_driver(title_form, REQ_END_LINE);
+        //} else if (ch == KEY_LEFT) {
+        //    form_driver(title_form, REQ_NEXT_FIELD);
+        //    form_driver(title_form, REQ_END_LINE);
+        //} else if (ch == KEY_RIGHT) {
+        //    form_driver(title_form, REQ_NEXT_FIELD);
+        //    form_driver(title_form, REQ_END_LINE);
 
-        } else if (ch == KEY_LEFT) {
-            if (x > movements[pos][1] && x <= TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
-                if (pos != 5 && pos != 6 && pos != 7) {
-                    --cur_x;
-                    wmove(title_win, movements[pos][0], cur_x);
-                } else if (pos == 6) {
-                    if (x == tuning_moves[cur_tune]) {
-                        --cur_tune;
-                        wmove(title_win, movements[pos][0], tuning_moves[cur_tune] + 1);
-                    } else if (x == tuning_moves[cur_tune] + 1) {
-                        --cur_x;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    }
-                } else if (pos == 7) {
-                    if (x == x_mins[pos] + BUTTON_WIDTH) {
-                        cur_x -= BUTTON_WIDTH;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    }
-                }
-            }
-
-        } else if (ch == KEY_RIGHT) {
-            if (x >= movements[pos][1] && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
-                if (pos != 5 && pos != 6 && pos != 7) {
-                    ++cur_x;
-                    wmove(title_win, movements[pos][0], cur_x);
-                } else if (pos == 6 && x < tuning_moves[strings-1] + 1) {
-                    if (x == tuning_moves[cur_tune]) {
-                        ++cur_x;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    } else if (x == tuning_moves[cur_tune] + 1) {
-                        ++cur_tune;
-                        wmove(title_win, movements[pos][0], tuning_moves[cur_tune]);
-                    }
-                } else if (pos == 7) {
-                    if (x == x_mins[pos]) {
-                        cur_x += BUTTON_WIDTH;
-                        wmove(title_win, movements[pos][0], cur_x);
-                    }
-                }
-            }
         /* ch is a letter, number or special char */
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
                     (ch >= 33 && ch <= 46) || ch == ' ' || ch == 64) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
 
-            //TEMP
-            int i;
-            for (i = 0; i < 6; i++)
-                mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
-            wrefresh(title_win);
-            //TEMP
-            
-            if (pos != 5 && pos != 6) {
-                label_push(pos, ch);
-                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
-                ++movements[pos][1];
-                wmove(title_win, movements[pos][0], movements[pos][1]);
+            form_driver(title_form, ch);
 
-            } else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
-                strings = ch - '0';
+            //if (pos != 5 && pos != 6) {
+            //    label_push(pos, ch);
+            //    mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
+            //    ++movements[pos][1];
+            //    wmove(title_win, movements[pos][0], movements[pos][1]);
 
-                destroy_win(title_win);
-                title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-                keypad(title_win, true);
+            //} else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
+            //    strings = ch - '0';
 
-                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
-                wmove(title_win, movements[pos][0], x_mins[pos]);
+            //    destroy_win(title_win);
+            //    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
+            //    keypad(title_win, true);
 
-            } else if (pos == 6  && ((x == tuning_moves[cur_tune] && ((ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g'))) ||
-                                     (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
+            //    mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
+            //    wmove(title_win, movements[pos][0], x_mins[pos]);
 
-                if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
-                    label_push(pos-1, ch - 'a' + 'A');
-                else
-                    label_push(pos-1, ch);
+            //} else if (pos == 6  && ((x == tuning_moves[cur_tune] && ((ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g'))) ||
+            //                         (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
 
-                if (cur_tune < strings-1) {
-                    if (x == tuning_moves[cur_tune] + 1) {
-                        ++cur_tune;
-                        movements[pos][1] = tuning_moves[cur_tune];
-                    } else
-                        ++movements[pos][1];
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
-                } else if (x == tuning_moves[strings - 1] || x == tuning_moves[strings-1] + 1) {
-                    ++movements[pos][1];
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
-                }
-            }
+            //    if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
+            //        label_push(pos-1, ch - 'a' + 'A');
+            //    else
+            //        label_push(pos-1, ch);
 
-        } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
+            //    if (cur_tune < strings-1) {
+            //        if (x == tuning_moves[cur_tune] + 1) {
+            //            ++cur_tune;
+            //            movements[pos][1] = tuning_moves[cur_tune];
+            //        } else
+            //            ++movements[pos][1];
+            //        wmove(title_win, movements[pos][0], movements[pos][1]);
+            //    } else if (x == tuning_moves[strings - 1] || x == tuning_moves[strings-1] + 1) {
+            //        ++movements[pos][1];
+            //        wmove(title_win, movements[pos][0], movements[pos][1]);
+            //    }
+            //}
+
+        //} else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
 
 
-            //TEMP
-            int i;
-            for (i = 0; i < 6; i++)
-                mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
-            wrefresh(title_win);
-            //TEMP
+        //    //TEMP
+        //    int i;
+        //    for (i = 0; i < 6; i++)
+        //        mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
+        //    wrefresh(title_win);
+        //    //TEMP
 
-            if (x > x_mins[pos]) {
-                if (pos != 5 && pos != 6) {
-                    label_del(pos);
-                    --movements[pos][1];
-                    mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-                    wmove(title_win, movements[pos][0], movements[pos][1]);
-                } else if (pos == 6) {
-                    if (x == tuning_moves[cur_tune] + 1 || x == tuning_moves[strings-1] + 2) {
-                        --movements[pos][1];
-                        mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-                        wmove(title_win, movements[pos][0], movements[pos][1]);   
-                    } else if (x == tuning_moves[cur_tune]) {
-                        --cur_tune;
-                        movements[pos][1] = tuning_moves[cur_tune] + 1;
-                        mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-                        wmove(title_win, movements[pos][0], movements[pos][1]);   
-                    }
-                }
-            } else if (pos == 5) {
-                strings = 6;
-                destroy_win(title_win);
-                title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-                keypad(title_win, true);
-                mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
-                wmove(title_win, movements[pos][0], x_mins[pos]);
-            }
+        //    if (x > x_mins[pos]) {
+        //        if (pos != 5 && pos != 6) {
+        //            label_del(pos);
+        //            --movements[pos][1];
+        //            mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
+        //            wmove(title_win, movements[pos][0], movements[pos][1]);
+        //        } else if (pos == 6) {
+        //            if (x == tuning_moves[cur_tune] + 1 || x == tuning_moves[strings-1] + 2) {
+        //                --movements[pos][1];
+        //                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
+        //                wmove(title_win, movements[pos][0], movements[pos][1]);   
+        //            } else if (x == tuning_moves[cur_tune]) {
+        //                --cur_tune;
+        //                movements[pos][1] = tuning_moves[cur_tune] + 1;
+        //                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
+        //                wmove(title_win, movements[pos][0], movements[pos][1]);   
+        //            }
+        //        }
+        //    } else if (pos == 5) {
+        //        strings = 6;
+        //        destroy_win(title_win);
+        //        title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
+        //        keypad(title_win, true);
+        //        mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
+        //        wmove(title_win, movements[pos][0], x_mins[pos]);
+        //    }
         } else if (ch == '\n') {    /* when user presses one of the buttons */
             if (pos != 7) {
                 ++pos;
