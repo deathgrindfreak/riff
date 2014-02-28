@@ -35,8 +35,8 @@
 #include "riff.h"
 
 
-int strings = 6;                       /* number of guitar strings */
-FIELD *fields[7];
+extern int strings = 6;                       /* number of guitar strings */
+extern FIELD *fields[];
 
 
 /* tuning_length - finds the true length of a guitar tuning */

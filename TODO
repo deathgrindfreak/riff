@@ -1,5 +1,6 @@
 //TODO
 
+* Set the form type to only allow certain values to be inputted
 * Replace inputting into arrays with fields instead.  This should get rid of some of the weird behavior with the header printing.
 * Make sure that ALL special characters are able to inputted (or restricted) into the appropriate label.  I.E., whitespace and underscore for project title.
 * Fix tuning issues - Input doesn't allow user to enter one letter only (i.e. without accidentals), it simply moves back to the skipped space, inputs the letter 

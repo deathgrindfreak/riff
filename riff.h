@@ -39,11 +39,7 @@
 #define MIN_HEIGHT 35       	/* Minimum height for terminal */
 #define TITLE_WINDOW_WIDTH  60	/* Title window width */
 #define TITLE_WINDOW_HEIGHT 29	/* Title window height */
-
-
-int strings = 6;                       /* number of guitar strings */
-FIELD *fields[7];
-
+#define BUTTON_WIDTH 8          /* Space between the OK and CANCEL buttons */
 
 int tuning_length(char[]);
 void header(int);

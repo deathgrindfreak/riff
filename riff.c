@@ -37,19 +37,17 @@
 #include "riff.h"
 
 
+FIELD  *fields[14];
+
+
 int main(int argc, char *argv[])
 {
     // Initial values
     WINDOW *title_win;  // Title window pointer
-    //FIELD  *fields[7];
     FORM   *title_form;
 
-    int i;
-    for (i = 0; i < 7; i++)
-        fields[i] = NULL;
 
     int row, col;
-
 
     // Start screen
     initscr();
@@ -107,30 +105,20 @@ int main(int argc, char *argv[])
     fields[2] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[2] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 6 , x_mins[2], 0, 0); 
     fields[3] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[3] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 8 , x_mins[3], 0, 0); 
     fields[4] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[4] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 10, x_mins[4], 0, 0); 
-    fields[5] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[5] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 14, x_mins[5], 0, 0); 
-    fields[6] = new_field(1, TITLE_WINDOW_WIDTH - x_mins[6] - 2 * WIN_X_BUFFER, WIN_Y_BUFFER + WIN_HEADER + 16, x_mins[6], 0, 0); 
-    fields[7];
+    fields[5] = new_field(1, 1                                                , WIN_Y_BUFFER + WIN_HEADER + 14, x_mins[5], 0, 0); 
+
+    int i;
+    for (i = 0; i < strings; i++)
+        fields[6 + i]  = new_field(1, 2, WIN_Y_BUFFER + WIN_HEADER + 16, x_mins[6] + i * 6, 0, 0);
+
+    for (i = 0; i < 8 - strings; i++)
+        fields[6 + strings + i] = NULL;
     
-    set_field_back(fields[0], A_UNDERLINE);
-    field_opts_off(fields[0], O_AUTOSKIP);
+    for (i = 0; i < 12; i++) {  // Needs to be able to change with string change
+        set_field_back(fields[i], A_UNDERLINE);
+        field_opts_off(fields[i], O_AUTOSKIP);
+    }
 
-    set_field_back(fields[1], A_UNDERLINE);
-    field_opts_off(fields[1], O_AUTOSKIP);
-
-    set_field_back(fields[2], A_UNDERLINE);
-    field_opts_off(fields[2], O_AUTOSKIP);
-
-    set_field_back(fields[3], A_UNDERLINE);
-    field_opts_off(fields[3], O_AUTOSKIP);
-
-    set_field_back(fields[4], A_UNDERLINE);
-    field_opts_off(fields[4], O_AUTOSKIP);
-
-    set_field_back(fields[5], A_UNDERLINE);
-    field_opts_off(fields[5], O_AUTOSKIP);
-
-    set_field_back(fields[6], A_UNDERLINE);
-    field_opts_off(fields[6], O_AUTOSKIP);
     
     /* Create the title window form */
     set_form_win(title_form, title_win);
@@ -149,19 +137,7 @@ int main(int argc, char *argv[])
                             {WIN_Y_BUFFER + WIN_HEADER + 20 , x_mins[7]},
                           };
 
-    int tuning_moves[8] = { // 8 possible moves for the 8 individual strings
-                            WIN_X_BUFFER + strlen("Tuning: (1)"),
-                            WIN_X_BUFFER + strlen("Tuning: (1)") +     6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 2 * 6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 3 * 6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 4 * 6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 5 * 6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 6 * 6,
-                            WIN_X_BUFFER + strlen("Tuning: (1)") + 7 * 6,
-                          };
-
-    int y, x, cur_tune = 0, cur_x = movements[0][1], ch, pos = 0,
-        BUTTON_WIDTH = 8;
+    int y, x;
 
     wmove(title_win, movements[0][0], movements[0][1]);
     wrefresh(title_win);
@@ -169,118 +145,50 @@ int main(int argc, char *argv[])
     while (true) {
         ch = wgetch(title_win);
         getyx(title_win, y, x);
-        cur_x = x;
         if (ch ==  KEY_UP) {
-            form_driver(title_form, REQ_PREV_FIELD);
-            form_driver(title_form, REQ_END_LINE);
+            if (y == movements[7][0])
+                move(movements[6][0], movements[6][1]);
+            else if (y == movements[6][0] && x == movements[6][1]) {
+                form_driver(title_form, REQ_PREV_FIELD);
+                form_driver(title_form, REQ_END_LINE);
+            } else if (y != movements[7][0] && y != movements[6][0]){
+                form_driver(title_form, REQ_PREV_FIELD);
+                form_driver(title_form, REQ_END_LINE);
+            }
         } else if (ch == KEY_DOWN) {
-            form_driver(title_form, REQ_NEXT_FIELD);
-            form_driver(title_form, REQ_END_LINE);
-        //} else if (ch == KEY_LEFT) {
-        //    form_driver(title_form, REQ_NEXT_FIELD);
-        //    form_driver(title_form, REQ_END_LINE);
-        //} else if (ch == KEY_RIGHT) {
-        //    form_driver(title_form, REQ_NEXT_FIELD);
-        //    form_driver(title_form, REQ_END_LINE);
+            if (y == movements[6][0])
+                move(movements[7][0], movements[7][1]);
+            else if (y != movements[7][0] && y != movements[6][0]){
+                form_driver(title_form, REQ_NEXT_FIELD);
+                form_driver(title_form, REQ_END_LINE);
+            }
+        } else if (ch == KEY_LEFT) {
+            if (y == movements[6][0]) {
+                form_driver(title_form, REQ_PREV_FIELD);
+                form_driver(title_form, REQ_END_LINE);
+            } else if (y == movements[7][0] && x == (movements[7][1] + BUTTON_WIDTH)){  // Is at CANCEL button
+                move(movements[7][0], movements[7][1]);
+            }
+        } else if (ch == KEY_RIGHT) {
+            if (y == movements[6][0]) {
+                form_driver(title_form, REQ_NEXT_FIELD);
+                form_driver(title_form, REQ_END_LINE);
+            } else if (y == movements[7][0] && x == movements[7][1]) {   // Is at OK button
+                move(movements[7][0], movements[7][1] + BUTTON_WIDTH);
+            }
+        } else if (ch == '\n' && y == movements[7][0]) {
+            if (x == movements[7][1]) { // OK
+                continue;
+            } else {    // CANCEL
+                clear();
+                endwin();
+                break;
+            }
 
         /* ch is a letter, number or special char */
         } else if (((ch >= 'a'&& ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-                    (ch >= 33 && ch <= 46) || ch == ' ' || ch == 64) && x < TITLE_WINDOW_WIDTH - 2 * WIN_X_BUFFER) {
-
+                    (ch >= 33 && ch <= 46) || ch == ' ' || ch == 64)) {
             form_driver(title_form, ch);
-
-            //if (pos != 5 && pos != 6) {
-            //    label_push(pos, ch);
-            //    mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", ch);
-            //    ++movements[pos][1];
-            //    wmove(title_win, movements[pos][0], movements[pos][1]);
-
-            //} else if (pos == 5 && (ch >= '4' && ch <= '8') && x == x_mins[pos]) {
-            //    strings = ch - '0';
-
-            //    destroy_win(title_win);
-            //    title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-            //    keypad(title_win, true);
-
-            //    mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", ch);
-            //    wmove(title_win, movements[pos][0], x_mins[pos]);
-
-            //} else if (pos == 6  && ((x == tuning_moves[cur_tune] && ((ch >= 'A' && ch <= 'G') || (ch >= 'a' && ch <= 'g'))) ||
-            //                         (x == tuning_moves[cur_tune] + 1 && (ch == 'b' || ch == '#')))) {
-
-            //    if (ch >= 'a' && ch <= 'g') // NEED TO ENSURE THAT LOWER CASE B IS IN FACT A NOTE LETTER AND NOT A FLAT 
-            //        label_push(pos-1, ch - 'a' + 'A');
-            //    else
-            //        label_push(pos-1, ch);
-
-            //    if (cur_tune < strings-1) {
-            //        if (x == tuning_moves[cur_tune] + 1) {
-            //            ++cur_tune;
-            //            movements[pos][1] = tuning_moves[cur_tune];
-            //        } else
-            //            ++movements[pos][1];
-            //        wmove(title_win, movements[pos][0], movements[pos][1]);
-            //    } else if (x == tuning_moves[strings - 1] || x == tuning_moves[strings-1] + 1) {
-            //        ++movements[pos][1];
-            //        wmove(title_win, movements[pos][0], movements[pos][1]);
-            //    }
-            //}
-
-        //} else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
-
-
-        //    //TEMP
-        //    int i;
-        //    for (i = 0; i < 6; i++)
-        //        mvwprintw(title_win, WIN_Y_BUFFER + WIN_HEADER + 17 + i, 1, "%s", title_window_labels[i]);
-        //    wrefresh(title_win);
-        //    //TEMP
-
-        //    if (x > x_mins[pos]) {
-        //        if (pos != 5 && pos != 6) {
-        //            label_del(pos);
-        //            --movements[pos][1];
-        //            mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-        //            wmove(title_win, movements[pos][0], movements[pos][1]);
-        //        } else if (pos == 6) {
-        //            if (x == tuning_moves[cur_tune] + 1 || x == tuning_moves[strings-1] + 2) {
-        //                --movements[pos][1];
-        //                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-        //                wmove(title_win, movements[pos][0], movements[pos][1]);   
-        //            } else if (x == tuning_moves[cur_tune]) {
-        //                --cur_tune;
-        //                movements[pos][1] = tuning_moves[cur_tune] + 1;
-        //                mvwprintw(title_win, movements[pos][0], movements[pos][1], "%c", '_');
-        //                wmove(title_win, movements[pos][0], movements[pos][1]);   
-        //            }
-        //        }
-        //    } else if (pos == 5) {
-        //        strings = 6;
-        //        destroy_win(title_win);
-        //        title_win = title_info_win(TITLE_WINDOW_HEIGHT, TITLE_WINDOW_WIDTH, starty, startx);
-        //        keypad(title_win, true);
-        //        mvwprintw(title_win, movements[pos][0], x_mins[pos], "%c", '_');
-        //        wmove(title_win, movements[pos][0], x_mins[pos]);
-        //    }
-        } else if (ch == '\n') {    /* when user presses one of the buttons */
-            if (pos != 7) {
-                ++pos;
-                wmove(title_win, movements[pos][0], movements[pos][1]);   
-            } else if (y == movements[7][0] && x == movements[7][1]) { /* "OK" button */
-                destroy_win(title_win);
-                clear();
-                header(col);
-                staff(row, col);
-                refresh();
-                break;
-            } else if (y == movements[7][0] && x == movements[7][1] + BUTTON_WIDTH) { /* "CANCEL" button */
-                destroy_win(title_win);
-                clear();
-                header(col);
-                staff(row, col);
-                refresh();
-                break;
-            }
         }
     }
 
