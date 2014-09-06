@@ -27,8 +27,9 @@
   * either expressed or implied, of the FreeBSD Project.                             *
   ************************************************************************************|#
 
-(use ncurses)
+
 (declare (uses print big-text))
+(use ncurses)
 
 
   ;; Global constants
@@ -59,14 +60,26 @@
     '#t]
    [else #f]))
 
+;;; Init the screen for the program
+(define (init-riff)
+  (initscr)
+  (clear)
+  (noecho)
+  (cbreak))
+
+;;; Close the program
+(define (close-riff win)
+  (clear)
+  (echo)
+  (delwin win)
+  (nocbreak)
+  (endwin))
+
 
 (define (main)
   
   ;; Start screen
-  (initscr)
-  (clear)
-  (noecho)
-  (cbreak)
+  (init-riff)
 
   ;; Set options for stdscr
   (nodelay (stdscr) #t)
@@ -87,21 +100,22 @@
   (define title-win (newwin TITLE_WINDOW_HEIGHT TITLE_WINDOW_WIDTH starty startx))
   (box title-win 0 0)
 
+  (print-header MAX_COLS)
+  (print-multiple-staffs 4 MAX_COLS)
+  (print-window title-win)
+  (refresh)
+  (wrefresh title-win)
 
+  
   ;; Main program loop
-  (unless (screen-size-too-small MAX_ROWS MAX_COLS)
-    (let loop ()
+  (let loop ()
+    (unless (screen-size-too-small MAX_ROWS MAX_COLS)
       (unless (= (char->integer (getch)) 27)
-          
-        (print-multiple-staffs 5 MAX_COLS)
-        (mvwprintw title-win 10 10 "~a" "fuck")
-        (wrefresh title-win)
-        (refresh)
-          
+
         (loop))))
-  (clear)
-  (delwin title-win)
-  (endwin))
+
+  ;; Close the program
+  (close-riff title-win))
   
 (main)
   #|

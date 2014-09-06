@@ -29,6 +29,8 @@
 
 
 (declare (unit big-text))
+(use ncurses)
+
 
 ;;; Vector of lists for alphabetic characters
 (define alpha
@@ -111,17 +113,21 @@
 
 
 ;;; Prints a string of big charactes
-(define (print-big-string str)
-  (let ((str-lst (big-text-string str)))
-    (map (lambda (ch) (printf "~a " (car ch))) str-lst) (printf "\n")
-    (map (lambda (ch) (printf "~a " (cadr ch))) str-lst) (printf "\n")
-    (map (lambda (ch) (printf "~a " (caddr ch))) str-lst) (printf "\n")))
+(define (print-big-string str row col)
+  (let ([str-lst (big-text-string str)])
+    (let ([first-row (foldr (lambda (x y) (string-append (car x) " " y)) "" str-lst)]
+          [second-row (foldr (lambda (x y) (string-append (cadr x) " " y)) "" str-lst)]
+          [third-row (foldr (lambda (x y) (string-append (caddr x) " " y)) "" str-lst)])
+      (mvprintw row col "~a " first-row)
+      (mvprintw (+ row 1) col "~a " second-row)
+      (mvprintw (+ row 2) col "~a " third-row))))
 
 
 ;;; Returns the width of a big string
-(define (big-string-length big-str)
-  (- (foldr + 0
-            (map (lambda (ch) (+ (string-length (car ch))
-                            1))
-                 big-str))
-     1))
+(define (big-string-length str)
+  (let ([big-str (big-text-string str)])
+    (- (foldr + 0
+              (map (lambda (ch) (+ (string-length (car ch))
+                              1))
+                   big-str))
+       1)))
